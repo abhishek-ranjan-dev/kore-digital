@@ -66,12 +66,6 @@ export default function Hero() {
               >
                 Investor Relations <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link
-                href="/business"
-                className="inline-flex items-center gap-2 border border-neutral-500 hover:border-accent/50 text-neutral-200 hover:text-accent px-6 py-3 rounded transition-all text-sm"
-              >
-                Our Business Segments
-              </Link>
             </div>
 
             {/* Metrics strip */}
