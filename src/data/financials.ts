@@ -77,20 +77,6 @@ export const financials: FinancialYear[] = [
     annualReportUrl: "/documents/annual-reports/KDL_Annual-Report_2024.pdf",
     isProjected: false,
   },
-  {
-    // FY24-25 — CONSOLIDATED figures per latest board-approved position.
-    // Audited annual report not yet released; only the headline income
-    // statement metrics are populated (LT Borrowings / WIP / Net Worth
-    // will be filled once the audited balance sheet is published).
-    year: "FY24-25",
-    revenue: 408.38,
-    revenueGrowth: 294.5, // (408.38 - 103.51) / 103.51 × 100
-    longTermBorrowings: null,
-    workInProgress: null,
-    netWorth: null,
-    annualReportUrl: "",
-    isProjected: false,
-  },
 ];
 
 export const keyMetrics = {
