@@ -1,4 +1,4 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+The corporate & investor-relations website for **Kore Digital Limited** (NSE: KOREDIGIT), built with [Next.js 16](https://nextjs.org) and Tailwind CSS v4.
 
 ## Getting Started
 
