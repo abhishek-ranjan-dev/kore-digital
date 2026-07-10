@@ -72,7 +72,9 @@ function SectionHead({
    TAB 1 — Financial Performance
    ═══════════════════════════════════════════════════════════════════ */
 function FinancialsTab() {
-  const latest = financials.find(
+  // Array is ordered oldest → newest; findLast picks the most recent
+  // audited year that has a revenue figure.
+  const latest = financials.findLast(
     (f) => !f.isProjected && f.revenue !== null
   );
 
