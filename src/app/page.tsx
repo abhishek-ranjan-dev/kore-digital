@@ -41,27 +41,27 @@ function InvestorCTA() {
   ];
 
   return (
-    <section className="bg-kd-surface border-t border-kd-border py-24">
+    <section className="bg-surface border-t border-neutral-600 py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left */}
           <div className="space-y-6">
-            <p className="text-amber-400 text-xs font-semibold tracking-widest uppercase">
+            <p className="text-alt text-xs font-semibold tracking-widest uppercase">
               Investor Relations
             </p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-bold text-neutral-50 tracking-tight">
               Transparency Built
               <br />
               for Institutional Investors
             </h2>
-            <p className="text-slate-400 leading-relaxed max-w-lg">
+            <p className="text-neutral-300 leading-relaxed max-w-lg">
               Kore Digital maintains a fully compliant NSE/SEBI investor
               relations hub — all disclosures, financials, governance documents,
               and board communications are accessible in one place.
             </p>
             <Link
               href="/investor-relations"
-              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-3 rounded transition-colors text-sm"
+              className="inline-flex items-center gap-2 bg-alt hover:bg-alt text-bg font-bold px-6 py-3 rounded transition-colors text-sm"
             >
               Open Investor Dashboard <ArrowRight className="w-4 h-4" />
             </Link>
@@ -74,16 +74,16 @@ function InvestorCTA() {
               return (
                 <div
                   key={h.title}
-                  className="flex gap-4 bg-kd-card border border-kd-border rounded-xl p-5 hover:border-kd-border-hi transition-colors"
+                  className="flex gap-4 bg-surface border border-neutral-600 rounded-xl p-5 hover:border-neutral-500 transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-kd-elevated border border-kd-border flex items-center justify-center shrink-0">
-                    <Icon className="w-5 h-5 text-amber-400" />
+                  <div className="w-10 h-10 rounded-lg bg-elevated border border-neutral-600 flex items-center justify-center shrink-0">
+                    <Icon className="w-5 h-5 text-alt" />
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm mb-1">
+                    <p className="text-neutral-50 font-semibold text-sm mb-1">
                       {h.title}
                     </p>
-                    <p className="text-slate-400 text-sm leading-relaxed">
+                    <p className="text-neutral-300 text-sm leading-relaxed">
                       {h.body}
                     </p>
                   </div>

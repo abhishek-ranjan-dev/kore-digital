@@ -18,24 +18,44 @@ export const metadata: Metadata = {
     template: "%s | Kore Digital Limited",
   },
   description:
-    "Kore Digital Limited (NSE: KOREDIGIT) is a multi-sector deep-tech conglomerate building India's next-generation digital and industrial infrastructure — spanning 701 km fiber backbone, 1 GW AI hyperscale datacenter, and precision aerospace manufacturing.",
+    "Kore Digital Limited (NSE: KOREDIGIT) is a multi-sector deep-tech conglomerate building India's telecom infrastructure network — 701 km underground fiber optic network on the Samruddhi Mahamarg, a 1 GW AI datacenter hub in NAINA Mumbai, and on-demand metal additive manufacturing & reverse engineering for aerospace and defence.",
   keywords: [
-    "Kore Digital",
-    "NSE listed",
-    "fiber optic",
+    // Primary SEO targets
     "AI datacenter",
-    "infrastructure",
-    "Samruddhi Mahamarg",
-    "NAINA Mumbai",
-    "investor relations",
+    "telecom infrastructure network",
+    "on demand metal additive manufacturing",
+    "reverse engineering",
+    "underground fiber optic network",
+    // Brand & listing
+    "Kore Digital",
+    "Kore Digital Limited",
+    "KOREDIGIT",
+    "NSE listed",
     "SEBI",
+    "investor relations",
+    // Programme & project keywords
+    "Samruddhi Mahamarg fiber",
+    "NAINA Mumbai datacenter",
+    "1 GW hyperscale datacenter",
+    "701 km fiber backbone",
+    "dark fiber lease",
+    "metal 3D printing India",
+    "aerospace precision manufacturing",
+    "titanium nickel alloy spares",
+    "SINE IIT Bombay",
   ],
   openGraph: {
     title: "Kore Digital Limited — India's Next-Gen Infrastructure Conglomerate",
     description:
-      "NSE-listed deep-tech company building fiber connectivity, AI compute infrastructure, and aerospace precision hardware.",
+      "NSE-listed. Underground fiber optic network, AI datacenter infrastructure, and on-demand metal additive manufacturing & reverse engineering for aerospace and defence.",
     type: "website",
     locale: "en_IN",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kore Digital Limited (NSE: KOREDIGIT)",
+    description:
+      "Telecom infrastructure network · AI datacenter · On-demand metal additive manufacturing · Reverse engineering.",
   },
 };
 
@@ -47,9 +67,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-kd-bg text-slate-100">
+      <body className="min-h-full flex flex-col bg-bg text-neutral-50">
         {children}
       </body>
     </html>

@@ -1,7 +1,7 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
-  --background: #04080f;
+  --background: #132542;
   --foreground: #f1f5f9;
 }
 
@@ -12,18 +12,116 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/*
+  ── DESIGN SYSTEM PALETTE ──────────────────────────────────────────────
+  Single-source-of-truth for every colour on the site. Modelled on how
+  premium investor-grade sites (Reliance, Stripe, Bloomberg, TCS) are
+  built: a small set of BRAND colours × a rich NEUTRAL SCALE × semantic
+  STATUS colours.
+
+  Structure:
+    • Surface  — 3 tokens for elevation (page → card → highest)
+    • Neutral  — 8-shade grey ramp for text hierarchy & borders
+    • Brand    — 2 tokens (cyan accent + amber alt)
+    • Status   — 2 semantic tokens (success + danger)
+
+  Total: 15 tokens. Every hover, alpha variant, and colour combination
+  is derived from these — do NOT introduce raw hex values in components.
+*/
 @theme {
-  --color-kd-bg: #04080f;
-  --color-kd-surface: #07101f;
-  --color-kd-card: #0b1528;
-  --color-kd-elevated: #0e1c34;
-  --color-kd-border: #162240;
-  --color-kd-border-hi: #1e3056;
+  /* Surface scale — page background & card layers (dark theme, lighter = more elevated) */
+  --color-bg:       #132542;   /* page background */
+  --color-surface:  #1c3055;   /* cards, sections */
+  --color-elevated: #263c6b;   /* hovered cards, modals, active states */
+
+  /* Neutral ramp — 8 shades for text hierarchy & borders */
+  --color-neutral-50:  #f1f5f9;   /* primary text — headlines, body */
+  --color-neutral-100: #e2e8f0;   /* secondary text */
+  --color-neutral-200: #cbd5e1;   /* tertiary text — labels */
+  --color-neutral-300: #94a3b8;   /* muted body text */
+  --color-neutral-400: #64748b;   /* dim text, captions */
+  --color-neutral-500: #475569;   /* borders (strong) */
+  --color-neutral-600: #334155;   /* borders (default) */
+  --color-neutral-700: #1e293b;   /* borders (subtle), dividers */
+
+  /* Brand */
+  --color-accent: #22d3ee;   /* primary tech accent — cyan */
+  --color-alt:    #f59e0b;   /* secondary highlight — amber (IR / CTAs) */
+
+  /* Semantic status */
+  --color-success: #10b981;  /* emerald — live, In Progress, NSE Listed, "Copied!" */
+  --color-danger:  #ef4444;  /* red — closed, error, PDF icons */
+
+  /* Legacy alias — kept so bg-kd-bg refs in inline styles/comments still resolve */
+  --color-kd-bg: #132542;
 }
 
 @keyframes border-revolve {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/*
+  ── Mount-fade animation ──────────────────────────────────────────────
+  Used only on the About page hero (above the fold), where a scroll-based
+  reveal doesn't make sense because the content is already visible on load.
+  `.mount-fade-up-delay-{n}` variants stagger sibling elements into view.
+*/
+@keyframes mountFadeUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mount-fade-up,
+.mount-fade-up-delay-1,
+.mount-fade-up-delay-2,
+.mount-fade-up-delay-3 {
+  animation: mountFadeUp 500ms ease-out both;
+}
+.mount-fade-up-delay-1 { animation-delay: 150ms; }
+.mount-fade-up-delay-2 { animation-delay: 300ms; }
+.mount-fade-up-delay-3 { animation-delay: 450ms; }
+
+/*
+  ── Scroll-reveal defaults ────────────────────────────────────────────
+  The <Reveal> client component sets `data-reveal="in"` on its wrapper
+  when it enters the viewport. Inline styles on the component handle the
+  actual opacity/transform per-props; this rule is a defensive fallback
+  in case JS hasn't hydrated yet — ensures content isn't stuck invisible.
+*/
+[data-reveal] { will-change: opacity, transform; }
+
+/*
+  ── Reduced-motion guard ──────────────────────────────────────────────
+  Force all reveal / mount animations to their final state when the user
+  has requested reduced motion. Overrides inline styles set by <Reveal>
+  and <CountUp> via !important because those live on the element `style`
+  attribute.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .mount-fade-up,
+  .mount-fade-up-delay-1,
+  .mount-fade-up-delay-2,
+  .mount-fade-up-delay-3 {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 html {
@@ -32,8 +130,84 @@ html {
 }
 
 body {
-  background: var(--background);
+  /*
+    Faint ambient radial gradients — kept because they add premium depth
+    everywhere and give the two glass surfaces (Header + Contact cards)
+    coloured light to actually blur.
+  */
+  background:
+    radial-gradient(
+      ellipse 900px 500px at 12% 8%,
+      rgba(34, 211, 238, 0.06) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 700px 500px at 88% 92%,
+      rgba(245, 158, 11, 0.04) 0%,
+      transparent 60%
+    ),
+    var(--background);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-geist-sans, system-ui, sans-serif);
   -webkit-font-smoothing: antialiased;
+}
+
+/*
+  ── Glass utilities — used only where opted in ─────────────────────────
+  Mobile-conservative: 10px blur on small screens (~10% the GPU cost of
+  xl blur), stepped up to 18-20px on md+ where devices can handle it.
+*/
+
+/* Header / nav — high-alpha tint of the lifted kd-bg base so content
+   scrolling under it doesn't bleed through. Blur still active for the
+   frosted feel where the tint alone doesn't fully cover. */
+.glass-nav {
+  background-color: rgba(4, 8, 15, 0.8);
+  border-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+
+/*
+  Neutral glass card — for Contact section cards.
+  Uses a linear-gradient background so the surface has a natural top-lit
+  glass highlight (brighter at top-left, dimmer at bottom-right) rather
+  than a flat semi-opaque wash. Combined with an inset 1 px inner-top
+  highlight and a soft outer shadow this reads as actual glass instead
+  of "slightly tinted dark box".
+*/
+.glass {
+  /*
+    Layered background — card DARKER than the page bg.
+    ─ Top layer: subtle diagonal white gradient — the glass highlight
+    ─ Bottom layer: deep navy at ~90 % alpha (a shade darker than the
+      lifted kd-bg #132542) so the card reads as a sunken/anchored panel
+      instead of a raised one. Still translucent enough for backdrop-blur
+      to remain meaningful.
+  */
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0) 60%
+    ),
+    rgba(7, 15, 32, 0.9);
+  border-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 768px) {
+  .glass-nav {
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+  }
+  .glass {
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+  }
 }

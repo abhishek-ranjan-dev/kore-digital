@@ -26,7 +26,7 @@ const NAV_COLUMNS: { title: string; links: NavLink[] }[] = [
 export default function Footer() {
   return (
     /* Page-level padding — the area outside the box keeps the kd-bg colour */
-    <div className="bg-kd-bg px-4 sm:px-6 lg:px-8 pt-4 pb-8">
+    <div className="bg-bg px-4 sm:px-6 lg:px-8 pt-4 pb-8">
       <div className="max-w-7xl mx-auto">
 
         {/* ── Revolving-border box ─────────────────────────────────────────── */}
@@ -45,7 +45,7 @@ export default function Footer() {
           style={{
             padding: "1px",
             /* dim border colour visible when the bright arc isn't passing */
-            background: "#0a1628",
+            background: "var(--color-bg)",
             boxShadow:
               "0 0 40px rgba(56,189,248,0.08), 0 0 80px rgba(56,189,248,0.03), 0 16px 48px rgba(0,0,0,0.6)",
           }}
@@ -69,14 +69,14 @@ export default function Footer() {
               width: "200%",
               height: "200%",
               background:
-                "conic-gradient(from 0deg, #0a1628 0deg, #0a1628 336deg, #0c4a6e 343deg, #0ea5e9 350deg, #38bdf8 354deg, #bae6fd 356deg, #38bdf8 358deg, #0ea5e9 360deg)",
+                "conic-gradient(from 0deg, var(--color-bg) 0deg, var(--color-bg) 336deg, var(--color-accent) 343deg, var(--color-accent) 350deg, var(--color-accent) 354deg, var(--color-accent) 356deg, var(--color-accent) 358deg, var(--color-accent) 360deg)",
               animation: "border-revolve 5s linear infinite",
             }}
           />
 
           {/* ── Actual footer content ── */}
           <footer
-            className="relative bg-[#030712]"
+            className="relative bg-[var(--color-bg)]"
             style={{ borderRadius: "calc(1rem - 1px)" }}
           >
             <div className="px-6 sm:px-10 lg:px-12">
@@ -100,18 +100,18 @@ export default function Footer() {
                     />
                   </Link>
 
-                  <p className="text-slate-500 text-xs leading-relaxed">
+                  <p className="text-neutral-300 text-xs leading-relaxed">
                     Building India&apos;s next-gen digital and industrial infrastructure
                     across fiber, AI compute, and precision manufacturing.
                   </p>
 
                   {/* Compact badges */}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 bg-slate-800/50 border border-slate-700/50 rounded-md px-2.5 py-1 text-[11px] text-slate-400">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                    <span className="inline-flex items-center gap-1.5 bg-surface border border-neutral-500 rounded-md px-2.5 py-1 text-[11px] text-neutral-300">
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
                       {keyMetrics.listingExchange} Listed
                     </span>
-                    <span className="inline-flex items-center bg-slate-800/50 border border-slate-700/50 rounded-md px-2.5 py-1 text-[11px] text-cyan-400 font-mono">
+                    <span className="inline-flex items-center bg-surface border border-neutral-500 rounded-md px-2.5 py-1 text-[11px] text-accent font-mono">
                       {keyMetrics.ticker}
                     </span>
                   </div>
@@ -122,7 +122,7 @@ export default function Footer() {
                       href="mailto:cs@koredigital.com"
                       title="cs@koredigital.com"
                       aria-label="Email us"
-                      className="w-8 h-8 rounded-lg bg-slate-800/50 border border-slate-700/50 flex items-center justify-center text-slate-500 hover:text-cyan-400 hover:border-cyan-400/40 transition-all"
+                      className="w-8 h-8 rounded-lg bg-surface border border-neutral-500 flex items-center justify-center text-neutral-400 hover:text-accent hover:border-accent/40 transition-all"
                     >
                       <Mail className="w-3.5 h-3.5" />
                     </a>
@@ -130,7 +130,7 @@ export default function Footer() {
                       href="tel:+912266800001"
                       title="+91 22 6680 0001"
                       aria-label="Call us"
-                      className="w-8 h-8 rounded-lg bg-slate-800/50 border border-slate-700/50 flex items-center justify-center text-slate-500 hover:text-cyan-400 hover:border-cyan-400/40 transition-all"
+                      className="w-8 h-8 rounded-lg bg-surface border border-neutral-500 flex items-center justify-center text-neutral-400 hover:text-accent hover:border-accent/40 transition-all"
                     >
                       <Phone className="w-3.5 h-3.5" />
                     </a>
@@ -140,7 +140,7 @@ export default function Footer() {
                       rel="noopener noreferrer"
                       title="B 1107-1108, Shelton Sapphire, CBD Belapur, Navi Mumbai"
                       aria-label="View on map"
-                      className="w-8 h-8 rounded-lg bg-slate-800/50 border border-slate-700/50 flex items-center justify-center text-slate-500 hover:text-amber-400 hover:border-amber-400/40 transition-all"
+                      className="w-8 h-8 rounded-lg bg-surface border border-neutral-500 flex items-center justify-center text-neutral-400 hover:text-alt hover:border-alt/40 transition-all"
                     >
                       <MapPin className="w-3.5 h-3.5" />
                     </a>
@@ -150,7 +150,7 @@ export default function Footer() {
                 {/* 4 nav columns */}
                 {NAV_COLUMNS.map((col) => (
                   <div key={col.title}>
-                    <h4 className="text-slate-300 text-[10px] font-semibold tracking-widest uppercase mb-4">
+                    <h4 className="text-neutral-200 text-[10px] font-semibold tracking-widest uppercase mb-4">
                       {col.title}
                     </h4>
                     <ul className="space-y-2.5">
@@ -161,14 +161,14 @@ export default function Footer() {
                               href={link.href}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-slate-500 hover:text-slate-200 text-xs transition-colors"
+                              className="text-neutral-300 hover:text-neutral-50 text-xs transition-colors"
                             >
                               {link.label}
                             </a>
                           ) : (
                             <Link
                               href={link.href}
-                              className="text-slate-500 hover:text-slate-200 text-xs transition-colors"
+                              className="text-neutral-300 hover:text-neutral-50 text-xs transition-colors"
                             >
                               {link.label}
                             </Link>
@@ -181,16 +181,16 @@ export default function Footer() {
               </div>
 
               {/* Bottom utility bar */}
-              <div className="border-t border-slate-800/60 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                <p className="text-xs text-slate-500">
+              <div className="border-t border-neutral-600 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <p className="text-xs text-neutral-300">
                   © {new Date().getFullYear()} Kore Digital Limited. All rights reserved.
-                  <span className="mx-2 text-slate-700">·</span>
-                  <span className="text-slate-600">CIN: U64200MH2017PLC000001</span>
+                  <span className="mx-2 text-neutral-500">·</span>
+                  <span className="text-neutral-300">CIN: U64200MH2017PLC000001</span>
                 </p>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs text-slate-600 font-mono">{keyMetrics.isin}</span>
-                  <span className="text-slate-700 text-xs">|</span>
-                  <span className="text-xs text-slate-500">Regulated by SEBI &amp; NSE</span>
+                  <span className="text-xs text-neutral-300 font-mono">{keyMetrics.isin}</span>
+                  <span className="text-neutral-500 text-xs">|</span>
+                  <span className="text-xs text-neutral-300">Regulated by SEBI &amp; NSE</span>
                 </div>
               </div>
 

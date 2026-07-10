@@ -3,7 +3,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import InvestorTabs from "@/components/InvestorTabs";
 import { keyMetrics } from "@/data/financials";
-import { Shield, Activity, Zap } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Investor Relations",
@@ -11,178 +10,139 @@ export const metadata: Metadata = {
     "Kore Digital Limited investor relations hub — financial results, NSE stock exchange disclosures under Regulation 30, annual reports, corporate governance, and SEBI Regulation 46 compliance documents.",
 };
 
-const badges = [
-  {
-    icon: Activity,
-    label: "NSE Listed",
-    value: keyMetrics.ticker,
-    color: "text-emerald-400",
-    border: "border-emerald-400/25",
-    bg: "bg-emerald-400/5",
-  },
-  {
-    icon: Zap,
-    label: "ISIN",
-    value: keyMetrics.isin,
-    color: "text-cyan-400",
-    border: "border-cyan-400/25",
-    bg: "bg-cyan-400/5",
-  },
-  {
-    icon: Shield,
-    label: "Regulation",
-    value: "SEBI LODR 2015",
-    color: "text-amber-400",
-    border: "border-amber-400/25",
-    bg: "bg-amber-400/5",
-  },
-];
-
 export default function InvestorRelationsPage() {
   return (
     <>
       <Header />
-      <main className="flex-1 pt-16">
-        {/* Page hero */}
-        <div className="bg-kd-surface border-b border-kd-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-6">
-            {/* Breadcrumb */}
-            <p className="text-slate-500 text-xs">
-              <span className="hover:text-slate-300 transition-colors">
-                Home
-              </span>{" "}
-              <span className="mx-2 text-slate-700">/</span>
-              <span className="text-slate-300">Investor Relations</span>
-            </p>
+      {/*
+        ── Editorial dark canvas ─────────────────────────────────────────
+        Deep near-black backdrop instead of the site's default navy so
+        this page reads as its own institutional document rather than
+        another marketing section. Ultra-thin slate-800/40 dividers do
+        every visual separation — no colour blocks, no cards.
+      */}
+      <main className="flex-1 pt-16 bg-[#030712] text-slate-200">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 py-16 md:py-24">
 
-            <div className="space-y-3">
-              <p className="text-amber-400 text-xs font-semibold tracking-widest uppercase">
-                NSE / SEBI Compliance Hub
-              </p>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-                Investor Relations
-              </h1>
-              <p className="text-slate-400 leading-relaxed max-w-2xl">
-                Access Kore Digital Limited&apos;s complete compliance
-                repository — audited financial results, Regulation 30 stock
-                exchange disclosures, annual reports, board composition, and all
-                mandatory statutory policy documents under SEBI LODR Regulation
-                46.
-              </p>
-            </div>
+          {/* ── Micro-context strip ────────────────────────────────── */}
+          <p className="text-slate-600 text-[10px] font-mono tracking-[0.32em] uppercase mb-8">
+            [ NSE:&nbsp;{keyMetrics.ticker} &nbsp;|&nbsp; ISIN:&nbsp;{keyMetrics.isin} &nbsp;|&nbsp; SEBI LODR 2015 ]
+          </p>
 
-            {/* Listing badges */}
-            <div className="flex flex-wrap gap-3">
-              {badges.map((b) => {
-                const Icon = b.icon;
-                return (
-                  <div
-                    key={b.label}
-                    className={`flex items-center gap-2.5 ${b.bg} border ${b.border} rounded-lg px-4 py-2.5`}
-                  >
-                    <Icon className={`w-4 h-4 ${b.color}`} />
-                    <div>
-                      <p className="text-slate-500 text-[10px] uppercase tracking-widest leading-none mb-0.5">
-                        {b.label}
-                      </p>
-                      <p className={`font-mono font-bold text-sm ${b.color}`}>
-                        {b.value}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Compliance disclaimer banner */}
-        <div className="bg-amber-400/5 border-b border-amber-400/15">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <p className="text-amber-400/80 text-xs leading-relaxed">
-              <strong className="text-amber-400">Regulatory Notice:</strong>{" "}
-              All disclosures on this page are filed in compliance with SEBI
-              (Listing Obligations and Disclosure Requirements) Regulations,
-              2015. The information provided is for informational purposes only
-              and does not constitute investment advice. Past performance is not
-              indicative of future results.
+          {/* ── Editorial headline block ───────────────────────────── */}
+          <div className="mb-16 md:mb-24">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-slate-50 tracking-tighter leading-[0.92] mb-8">
+              Investor
+              <br />
+              Relations<span className="text-slate-600">.</span>
+            </h1>
+            <p className="text-slate-400 text-base md:text-lg leading-relaxed max-w-2xl">
+              Kore Digital Limited&apos;s complete compliance repository —
+              audited financial results, Regulation 30 stock-exchange
+              disclosures, annual reports, board composition, and every
+              statutory policy document filed under SEBI LODR Regulation 46.
             </p>
           </div>
-        </div>
 
-        {/* Main tabs */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* ── Thin canonical divider before content ──────────────── */}
+          <div className="border-t border-slate-800/40 mb-14 md:mb-20" />
+
+          {/* ── Main tabs & content ────────────────────────────────── */}
           <InvestorTabs />
-        </div>
 
-        {/* Registrar information */}
-        <div className="border-t border-kd-border bg-kd-surface">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <p className="text-slate-500 text-[10px] uppercase tracking-widest font-semibold">
-                  Share Transfer Agent (STA / RTA)
+          {/* ── Divider before registrar block ─────────────────────── */}
+          <div className="border-t border-slate-800/40 mt-20 md:mt-28 mb-14 md:mb-16" />
+
+          {/* ── Registrar / STA / Compliance officer block ─────────── */}
+          <section>
+            <p className="text-slate-600 text-[10px] font-mono tracking-[0.32em] uppercase mb-8">
+              Contact & Registered Agents
+            </p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-12 md:gap-x-16">
+
+              <div className="space-y-2.5">
+                <p className="text-slate-600 text-[10px] font-mono tracking-[0.25em] uppercase">
+                  Share Transfer Agent
                 </p>
-                <p className="text-white text-sm font-semibold">
+                <p className="text-slate-50 text-base font-semibold tracking-tight">
                   KFin Technologies Limited
                 </p>
-                <p className="text-slate-400 text-xs leading-relaxed">
-                  Selenium Building, Tower B, Plot 31–32, Gachibowli,
-                  Financial District, Hyderabad – 500 032
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  Selenium Building, Tower B, Plot 31–32,
+                  <br />
+                  Gachibowli, Financial District,
+                  <br />
+                  Hyderabad – 500 032
                 </p>
-                <p className="text-slate-400 text-xs">
-                  Tel: +91 40 6716 2222
-                </p>
+                <p className="text-slate-500 text-sm">Tel: +91 40 6716 2222</p>
                 <a
                   href="https://www.kfintech.com"
-                  className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="inline-block text-sm text-slate-300 opacity-70 hover:opacity-100 hover:text-slate-50 transition-opacity pt-1"
                 >
-                  www.kfintech.com ↗
+                  www.kfintech.com&nbsp;↗
                 </a>
               </div>
-              <div className="space-y-2">
-                <p className="text-slate-500 text-[10px] uppercase tracking-widest font-semibold">
+
+              <div className="space-y-2.5">
+                <p className="text-slate-600 text-[10px] font-mono tracking-[0.25em] uppercase">
                   Company Secretary & Compliance Officer
                 </p>
-                <p className="text-white text-sm font-semibold">
-                  Ms. Kavita Rao (ACS)
+                <p className="text-slate-50 text-base font-semibold tracking-tight">
+                  Ms. Kavita Rao{" "}
+                  <span className="text-slate-500 font-normal">(ACS)</span>
                 </p>
-                <p className="text-slate-400 text-xs leading-relaxed">
-                  Kore Digital Limited<br />
-                  Level 12, One BKC, Bandra Kurla Complex<br />
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  Kore Digital Limited
+                  <br />
+                  Level 12, One BKC, Bandra Kurla Complex
+                  <br />
                   Mumbai – 400 051
                 </p>
                 <a
                   href="mailto:compliance@koredigital.in"
-                  className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                  className="inline-block text-sm text-slate-300 opacity-70 hover:opacity-100 hover:text-slate-50 transition-opacity pt-1"
                 >
                   compliance@koredigital.in
                 </a>
               </div>
-              <div className="space-y-2">
-                <p className="text-slate-500 text-[10px] uppercase tracking-widest font-semibold">
+
+              <div className="space-y-2.5">
+                <p className="text-slate-600 text-[10px] font-mono tracking-[0.25em] uppercase">
                   Investor Grievance Redressal
                 </p>
-                <p className="text-slate-400 text-xs leading-relaxed">
+                <p className="text-slate-500 text-sm leading-relaxed">
                   For investor complaints, write to the Compliance Officer or
                   use the SEBI SCORES platform.
                 </p>
                 <a
                   href="https://scores.sebi.gov.in"
-                  className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="inline-block text-sm text-slate-300 opacity-70 hover:opacity-100 hover:text-slate-50 transition-opacity pt-1"
                 >
-                  SEBI SCORES Portal ↗
+                  SEBI SCORES Portal&nbsp;↗
                 </a>
-                <p className="text-slate-400 text-xs mt-2 leading-relaxed">
-                  SEBI Toll Free Helpline: 1800 266 7575 / 1800 22 7575
+                <p className="text-slate-500 text-sm pt-1">
+                  Toll-Free: 1800 266 7575 &nbsp;/&nbsp; 1800 22 7575
                 </p>
               </div>
+
             </div>
+          </section>
+
+          {/* ── Regulatory fine print ──────────────────────────────── */}
+          <div className="border-t border-slate-800/40 mt-16 md:mt-24 pt-8">
+            <p className="text-slate-600 text-[11px] leading-relaxed max-w-3xl">
+              All disclosures on this page are filed in compliance with SEBI
+              (Listing Obligations and Disclosure Requirements) Regulations,
+              2015. Information provided is for informational purposes only and
+              does not constitute investment advice. Past performance is not
+              indicative of future results.
+            </p>
           </div>
+
         </div>
       </main>
       <Footer />

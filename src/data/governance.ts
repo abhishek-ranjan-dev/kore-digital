@@ -132,53 +132,104 @@ export const committees: Committee[] = [
   },
 ];
 
+/*
+  ── Statutory policy repository ─────────────────────────────────────
+  Every entry below is backed by a real PDF living under
+  `public/documents/policies/`. The order roughly reflects governance
+  hierarchy — foundational codes of conduct first, then compliance
+  frameworks, then workplace policies.
+
+  `lastUpdated` is set to "Current version" universally because the
+  underlying PDFs don't carry a consistent revision date at their
+  head. Update on a per-policy basis if/when board minutes provide it.
+*/
 export const policyDocuments: PolicyDocument[] = [
   {
-    title: "Code of Conduct for Directors & Senior Management",
+    title: "Code of Conduct for Senior Management Personnel",
     mandatoryUnder: "SEBI LODR Regulation 17(5)",
     description:
-      "Ethical standards and compliance obligations for the Board of Directors and Senior Management Personnel.",
-    fileUrl: "/governance/code-of-conduct.pdf",
-    lastUpdated: "April 2025",
+      "Ethical standards and compliance obligations binding on the Board of Directors and Senior Management Personnel.",
+    fileUrl:
+      "/documents/policies/6.-Code-of-Conduct-for-Sr-Mgnt-Persnel-1.pdf",
+    lastUpdated: "Current version",
   },
   {
-    title: "Vigil Mechanism / Whistleblower Policy",
-    mandatoryUnder: "Section 177(9), Companies Act 2013 & SEBI LODR Reg. 22",
+    title: "Code of Conduct for Independent Directors",
+    mandatoryUnder: "Schedule IV, Companies Act 2013",
     description:
-      "Framework for reporting genuine concerns about unethical behavior, fraud, or governance violations.",
-    fileUrl: "/governance/whistleblower-policy.pdf",
-    lastUpdated: "April 2025",
+      "Guidelines governing the role, responsibilities, and duties of Independent Directors on the Board.",
+    fileUrl: "/documents/policies/7.-Code-For-Independent-Directors-1.pdf",
+    lastUpdated: "Current version",
   },
   {
-    title: "Related Party Transaction (RPT) Policy",
+    title: "Nomination & Remuneration Policy",
+    mandatoryUnder: "Section 178, Companies Act 2013 & SEBI LODR Reg. 19",
+    description:
+      "Framework for identifying persons qualified for appointment as directors and KMP, and for determining their remuneration.",
+    fileUrl: "/documents/policies/11.-Nomination-and-Remuneration-Policy.pdf",
+    lastUpdated: "Current version",
+  },
+  {
+    title: "Related Party Transaction Policy",
     mandatoryUnder: "Section 188, Companies Act 2013 & SEBI LODR Reg. 23",
     description:
       "Policy governing identification, approval, and disclosure of transactions with related parties.",
-    fileUrl: "/governance/rpt-policy.pdf",
-    lastUpdated: "April 2025",
+    fileUrl:
+      "/documents/policies/8.-Related-Party-Transaction-Policy-1.pdf",
+    lastUpdated: "Current version",
+  },
+  {
+    title: "Vigil Mechanism / Whistle-Blower Policy",
+    mandatoryUnder: "Section 177(9), Companies Act 2013 & SEBI LODR Reg. 22",
+    description:
+      "Framework for reporting genuine concerns about unethical behaviour, fraud, or governance violations without fear of retaliation.",
+    fileUrl: "/documents/policies/10.-Whistle-Blower-Policy-1.pdf",
+    lastUpdated: "Current version",
+  },
+  {
+    title:
+      "Code of Conduct for Insider Trading & Legitimate Purpose of UPSI",
+    mandatoryUnder: "SEBI (Prohibition of Insider Trading) Regulations, 2015",
+    description:
+      "Policy preventing insider trading and regulating the sharing of Unpublished Price Sensitive Information (UPSI) by designated persons.",
+    fileUrl:
+      "/documents/policies/1.-Code-of-Conduct-for-Insider-Trading-and-Legitimate-Purpose-of-UPSI-KORE.pdf",
+    lastUpdated: "Current version",
+  },
+  {
+    title: "Risk Management Policy",
+    mandatoryUnder: "SEBI LODR Regulation 21",
+    description:
+      "Framework for identifying, assessing, mitigating, and monitoring key risks across the organisation.",
+    fileUrl: "/documents/policies/9.-Risk-Management-Policy-1.pdf",
+    lastUpdated: "Current version",
+  },
+  {
+    title: "Policy for Determining Materiality of Events",
+    mandatoryUnder: "SEBI LODR Regulation 30",
+    description:
+      "Criteria used to determine which events and information warrant disclosure to the stock exchanges.",
+    fileUrl:
+      "/documents/policies/4.-Policy-for-Determining-Materiality-of-Events-1.pdf",
+    lastUpdated: "Current version",
   },
   {
     title: "Policy on Preservation of Documents",
     mandatoryUnder: "SEBI LODR Regulation 9",
     description:
-      "Guidelines on categorization and preservation timelines for corporate documents and records.",
-    fileUrl: "/governance/document-preservation-policy.pdf",
-    lastUpdated: "April 2025",
+      "Guidelines on categorisation and preservation timelines for corporate documents and records.",
+    fileUrl:
+      "/documents/policies/5.-Policy-for-Preservation-of-Documents-1.pdf",
+    lastUpdated: "Current version",
   },
   {
-    title: "Policy for Determining Material Subsidiaries",
-    mandatoryUnder: "SEBI LODR Regulation 16(1)(c)",
+    title: "Prevention of Sexual Harassment (POSH) Policy",
+    mandatoryUnder:
+      "Sexual Harassment of Women at Workplace (Prevention, Prohibition and Redressal) Act, 2013",
     description:
-      "Framework to identify and categorize material subsidiaries based on prescribed financial thresholds.",
-    fileUrl: "/governance/material-subsidiary-policy.pdf",
-    lastUpdated: "April 2025",
-  },
-  {
-    title: "Insider Trading Policy (PIT Regulations)",
-    mandatoryUnder: "SEBI PIT Regulations 2015",
-    description:
-      "Policy to prevent insider trading and regulate trading by designated persons in company securities.",
-    fileUrl: "/governance/insider-trading-policy.pdf",
-    lastUpdated: "April 2025",
+      "Zero-tolerance framework for prevention and redressal of sexual harassment at the workplace, including the Internal Complaints Committee constitution.",
+    fileUrl:
+      "/documents/policies/3.-Prevention-of-Sexual-Harressment-Policy-1.pdf",
+    lastUpdated: "Current version",
   },
 ];
