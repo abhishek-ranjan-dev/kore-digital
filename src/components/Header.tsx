@@ -18,7 +18,6 @@ export default function Header() {
     <header className="glass-nav fixed top-0 left-0 right-0 z-50 border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo + tagline */}
           <Link
             href="/"
             aria-label="Kore Digital Limited — Connect to infinity"
@@ -34,21 +33,20 @@ export default function Header() {
             />
             <span
               aria-hidden="true"
-              className="hidden md:inline-block h-6 w-px bg-elevated"
+              className="hidden md:inline-block h-6 w-px bg-white/10"
             />
-            <span className="hidden md:inline text-xs font-medium tracking-wide text-neutral-300 group-hover:text-accent transition-colors">
+            <span className="hidden md:inline text-xs font-medium tracking-wide text-white/60 group-hover:text-emerald transition-colors">
               Connect to infinity.
             </span>
           </Link>
 
-          {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) =>
               link.highlight ? (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-alt font-semibold text-sm px-3 py-1.5 rounded border border-alt/30 hover:border-alt/70 hover:text-alt transition-all"
+                  className="text-emerald font-semibold text-sm px-3 py-1.5 rounded border border-emerald/30 hover:border-emerald/70 hover:text-emerald transition-all"
                 >
                   {link.label}
                 </Link>
@@ -56,7 +54,7 @@ export default function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-neutral-300 text-sm px-3 py-2 hover:text-neutral-50 transition-colors rounded hover:bg-surface"
+                  className="text-white/70 text-sm px-3 py-2 hover:text-white transition-colors rounded hover:bg-white/5"
                 >
                   {link.label}
                 </Link>
@@ -64,16 +62,15 @@ export default function Header() {
             )}
           </nav>
 
-          {/* CTA + Mobile toggle */}
           <div className="flex items-center gap-3">
             <Link
               href="/contact"
-              className="hidden md:inline-flex items-center gap-1.5 bg-accent hover:bg-accent text-bg font-bold text-sm px-4 py-2 rounded transition-colors"
+              className="hidden md:inline-flex items-center gap-1.5 bg-emerald hover:brightness-110 text-obsidian font-bold text-sm px-4 py-2 rounded transition-all"
             >
               Get in Touch <ChevronRight className="w-3.5 h-3.5" />
             </Link>
             <button
-              className="md:hidden text-neutral-300 hover:text-neutral-50 p-1"
+              className="md:hidden text-white/70 hover:text-white p-1"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Toggle navigation menu"
             >
@@ -87,7 +84,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile dropdown */}
       {mobileOpen && (
         <div className="glass-nav md:hidden border-t">
           <div className="px-4 py-4 space-y-1">
@@ -97,8 +93,8 @@ export default function Header() {
                 href={link.href}
                 className={`block py-2.5 px-3 rounded text-sm transition-colors ${
                   link.highlight
-                    ? "text-alt font-semibold hover:bg-alt/10"
-                    : "text-neutral-300 hover:text-neutral-50 hover:bg-surface"
+                    ? "text-emerald font-semibold hover:bg-emerald/10"
+                    : "text-white/70 hover:text-white hover:bg-white/5"
                 }`}
                 onClick={() => setMobileOpen(false)}
               >
@@ -108,7 +104,7 @@ export default function Header() {
             <div className="pt-3">
               <Link
                 href="/contact"
-                className="block bg-accent hover:bg-accent text-bg font-bold text-sm px-4 py-3 rounded text-center transition-colors"
+                className="block bg-emerald hover:brightness-110 text-obsidian font-bold text-sm px-4 py-3 rounded text-center transition-all"
                 onClick={() => setMobileOpen(false)}
               >
                 Get in Touch

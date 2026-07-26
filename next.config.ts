@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  /*
+    Whitelist LAN origins for `next dev` so a phone on the same Wi-Fi can
+    hit the Mac's private IP without tripping Next's cross-origin guard.
+    Combine with `npm run dev:lan` (binds to 0.0.0.0).
+  */
+  allowedDevOrigins: ["192.168.*.*", "10.*.*.*"],
   experimental: {
     serverActions: {
       /*

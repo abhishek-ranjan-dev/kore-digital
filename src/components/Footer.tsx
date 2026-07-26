@@ -25,66 +25,128 @@ const NAV_COLUMNS: { title: string; links: NavLink[] }[] = [
 
 export default function Footer() {
   return (
-    /* Page-level padding — the area outside the box keeps the kd-bg colour */
-    <div className="bg-bg px-4 sm:px-6 lg:px-8 pt-4 pb-8">
+    <div className="bg-obsidian px-4 sm:px-6 lg:px-8 pt-10 pb-10">
       <div className="max-w-7xl mx-auto">
-
-        {/* ── Revolving-border box ─────────────────────────────────────────── */}
-        {/*
-          Technique:
-          • Outer shell:  relative, 1 px padding, rounded-2xl, overflow-hidden
-          • Spinning div: absolute inset-0 — same bounding box as the shell.
-                          Its conic-gradient has one narrow bright-cyan arc and
-                          the rest is dark navy. As it rotates, the 1 px gap
-                          between the shell edge and the inner footer reveals the
-                          bright arc travelling around the border.
-          • Inner footer: relative, solid bg, border-radius = shell radius – 1 px
-        */}
         <div
           className="relative overflow-hidden rounded-2xl"
           style={{
             padding: "1px",
-            /* dim border colour visible when the bright arc isn't passing */
-            background: "var(--color-bg)",
+            /*
+              Static gradient border. Top-left glows emerald, fading through
+              cyan to a neutral white/10 ring on the bottom-right — matches
+              the direction of the footer's inner linear-gradient highlight
+              so the light-source reads consistent.
+            */
+            background:
+              "linear-gradient(135deg, rgba(16,185,129,0.55) 0%, rgba(34,211,238,0.28) 22%, rgba(255,255,255,0.10) 55%, rgba(255,255,255,0.08) 100%)",
             boxShadow:
-              "0 0 40px rgba(56,189,248,0.08), 0 0 80px rgba(56,189,248,0.03), 0 16px 48px rgba(0,0,0,0.6)",
+              "0 0 40px rgba(16,185,129,0.10), 0 0 90px rgba(16,185,129,0.04), 0 24px 64px rgba(0,0,0,0.7)",
           }}
         >
           {/*
-            Revolving-border technique
-            ───────────────────────────
-            The spinner is 200 % × 200 % of the container, positioned so its
-            centre exactly overlaps the container's centre (top:-50%; left:-50%).
-            Default transform-origin (50 % 50 %) therefore pivots at the
-            container centre.  Rotating the element spins the conic-gradient's
-            bright arc around that centre; overflow-hidden clips everything to
-            the container shape, revealing only the 1 px gap as the border — so
-            the bright spot appears to travel around all four edges.
+            Orbiting comet trail — an SVG rounded-rect stroke that
+            travels around the border at constant linear velocity.
+            `pathLength="100"` normalises the perimeter so the dash
+            (7 units) and gap (93 units) work identically regardless of
+            card aspect ratio. On wide footers this is critical — a
+            transform-rotated conic gradient would blip too fast across
+            the short vertical edges (angular vs. linear velocity).
           */}
-          <div
+          <svg
+            aria-hidden
+            className="pointer-events-none absolute inset-0 h-full w-full"
             style={{
-              position: "absolute",
-              top: "-50%",
-              left: "-50%",
-              width: "200%",
-              height: "200%",
-              background:
-                "conic-gradient(from 0deg, var(--color-bg) 0deg, var(--color-bg) 336deg, var(--color-accent) 343deg, var(--color-accent) 350deg, var(--color-accent) 354deg, var(--color-accent) 356deg, var(--color-accent) 358deg, var(--color-accent) 360deg)",
-              animation: "border-revolve 5s linear infinite",
+              /*
+                Critical: SVG's default overflow is hidden, and this SVG
+                sits inside the shell's 1px padding (absolute children
+                position from the PADDING box, not the border box). Without
+                overflow:visible the outer half of the stroke — the part
+                that lives in the 1px border ring — gets clipped and the
+                comet is completely invisible.
+              */
+              overflow: "visible",
+              filter: "drop-shadow(0 0 6px rgba(16,185,129,0.55))",
             }}
-          />
+          >
+            {/*
+              Comet trail — 5 stacked rounded-rect strokes, each with a
+              progressively longer dash and lower opacity. Every layer's
+              stroke-dashoffset animates over 6s so their offset RANGE is
+              (1 - dash_len) → (1 - dash_len - 100), which keeps every
+              layer's leading edge at the SAME path position at every
+              frame. Result: the composite reads as a bright head with a
+              fading trail behind it, sweeping around the border at
+              constant linear velocity.
+            */}
+            <g data-border-orbit>
+              {/* Head — bright near-white core */}
+              <rect
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                rx="15"
+                ry="15"
+                fill="none"
+                stroke="rgba(230,255,242,1)"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                pathLength="100"
+                strokeDasharray="1 99"
+              >
+                <animate attributeName="stroke-dashoffset" from="0" to="-100" dur="6s" repeatCount="indefinite" />
+              </rect>
+              {/* Head glow — emerald */}
+              <rect
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                rx="15"
+                ry="15"
+                fill="none"
+                stroke="rgba(16,185,129,0.7)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                pathLength="100"
+                strokeDasharray="3 97"
+              >
+                <animate attributeName="stroke-dashoffset" from="2" to="-98" dur="6s" repeatCount="indefinite" />
+              </rect>
+              {/* Mid tail */}
+              <rect
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                rx="15"
+                ry="15"
+                fill="none"
+                stroke="rgba(16,185,129,0.35)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                pathLength="100"
+                strokeDasharray="4 96"
+              >
+                <animate attributeName="stroke-dashoffset" from="3" to="-97" dur="6s" repeatCount="indefinite" />
+              </rect>
+            </g>
+          </svg>
 
-          {/* ── Actual footer content ── */}
           <footer
-            className="relative bg-[var(--color-bg)]"
-            style={{ borderRadius: "calc(1rem - 1px)" }}
+            className="relative"
+            style={{
+              borderRadius: "calc(1rem - 1px)",
+              /* Fully opaque — the orbit lives BEHIND this layer. */
+              background:
+                "linear-gradient(135deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0) 55%), rgb(15, 20, 32)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
+            }}
           >
             <div className="px-6 sm:px-10 lg:px-12">
 
-              {/* Main grid — brand takes 2/4 on desktop, nav cols take 1 each */}
               <div className="py-12 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-10">
 
-                {/* Brand column — spans 2 cols on desktop for breathing room */}
                 <div className="col-span-2 lg:col-span-2 space-y-5">
                   <Link
                     href="/"
@@ -100,29 +162,27 @@ export default function Footer() {
                     />
                   </Link>
 
-                  <p className="text-neutral-300 text-xs leading-relaxed">
+                  <p className="text-white/70 text-xs leading-relaxed">
                     Building India&apos;s next-gen digital and industrial infrastructure
                     across fiber, AI compute, and precision manufacturing.
                   </p>
 
-                  {/* Compact badges */}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 bg-surface border border-neutral-500 rounded-md px-2.5 py-1 text-[11px] text-neutral-300">
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                    <span className="inline-flex items-center gap-1.5 bg-white/[0.03] border border-white/10 rounded-md px-2.5 py-1 text-[11px] text-white/70">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald shrink-0" />
                       {keyMetrics.listingExchange} Listed
                     </span>
-                    <span className="inline-flex items-center bg-surface border border-neutral-500 rounded-md px-2.5 py-1 text-[11px] text-accent font-mono">
+                    <span className="inline-flex items-center bg-white/[0.03] border border-white/10 rounded-md px-2.5 py-1 text-[11px] text-emerald font-mono">
                       {keyMetrics.ticker}
                     </span>
                   </div>
 
-                  {/* Icon shortcuts */}
                   <div className="flex items-center gap-2">
                     <a
                       href="mailto:cs@koredigital.com"
                       title="cs@koredigital.com"
                       aria-label="Email us"
-                      className="w-8 h-8 rounded-lg bg-surface border border-neutral-500 flex items-center justify-center text-neutral-400 hover:text-accent hover:border-accent/40 transition-all"
+                      className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/10 flex items-center justify-center text-white/60 hover:text-emerald hover:border-emerald/40 transition-all"
                     >
                       <Mail className="w-3.5 h-3.5" />
                     </a>
@@ -130,7 +190,7 @@ export default function Footer() {
                       href="tel:+912266800001"
                       title="+91 22 6680 0001"
                       aria-label="Call us"
-                      className="w-8 h-8 rounded-lg bg-surface border border-neutral-500 flex items-center justify-center text-neutral-400 hover:text-accent hover:border-accent/40 transition-all"
+                      className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/10 flex items-center justify-center text-white/60 hover:text-emerald hover:border-emerald/40 transition-all"
                     >
                       <Phone className="w-3.5 h-3.5" />
                     </a>
@@ -140,17 +200,16 @@ export default function Footer() {
                       rel="noopener noreferrer"
                       title="B 1107-1108, Shelton Sapphire, CBD Belapur, Navi Mumbai"
                       aria-label="View on map"
-                      className="w-8 h-8 rounded-lg bg-surface border border-neutral-500 flex items-center justify-center text-neutral-400 hover:text-alt hover:border-alt/40 transition-all"
+                      className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/10 flex items-center justify-center text-white/60 hover:text-emerald hover:border-emerald/40 transition-all"
                     >
                       <MapPin className="w-3.5 h-3.5" />
                     </a>
                   </div>
                 </div>
 
-                {/* 4 nav columns */}
                 {NAV_COLUMNS.map((col) => (
                   <div key={col.title}>
-                    <h4 className="text-neutral-200 text-[10px] font-semibold tracking-widest uppercase mb-4">
+                    <h4 className="text-white/80 text-[10px] font-semibold tracking-widest uppercase mb-4">
                       {col.title}
                     </h4>
                     <ul className="space-y-2.5">
@@ -161,14 +220,14 @@ export default function Footer() {
                               href={link.href}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-neutral-300 hover:text-neutral-50 text-xs transition-colors"
+                              className="text-white/70 hover:text-white text-xs transition-colors"
                             >
                               {link.label}
                             </a>
                           ) : (
                             <Link
                               href={link.href}
-                              className="text-neutral-300 hover:text-neutral-50 text-xs transition-colors"
+                              className="text-white/70 hover:text-white text-xs transition-colors"
                             >
                               {link.label}
                             </Link>
@@ -180,24 +239,22 @@ export default function Footer() {
                 ))}
               </div>
 
-              {/* Bottom utility bar */}
-              <div className="border-t border-neutral-600 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                <p className="text-xs text-neutral-300">
+              <div className="border-t border-white/10 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <p className="text-xs text-white/70">
                   © {new Date().getFullYear()} Kore Digital Limited. All rights reserved.
-                  <span className="mx-2 text-neutral-500">·</span>
-                  <span className="text-neutral-300">CIN: U64200MH2017PLC000001</span>
+                  <span className="mx-2 text-white/30">·</span>
+                  <span className="text-white/70">CIN: U64200MH2017PLC000001</span>
                 </p>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs text-neutral-300 font-mono">{keyMetrics.isin}</span>
-                  <span className="text-neutral-500 text-xs">|</span>
-                  <span className="text-xs text-neutral-300">Regulated by SEBI &amp; NSE</span>
+                  <span className="text-xs text-white/70 font-mono">{keyMetrics.isin}</span>
+                  <span className="text-white/30 text-xs">|</span>
+                  <span className="text-xs text-white/70">Regulated by SEBI &amp; NSE</span>
                 </div>
               </div>
 
             </div>
           </footer>
         </div>
-        {/* ── End revolving-border box ── */}
 
       </div>
     </div>

@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 :root {
-  --background: #132542;
+  --background: #090D16;
   --foreground: #f1f5f9;
 }
 
@@ -54,15 +54,128 @@
 
   /* Legacy alias — kept so bg-kd-bg refs in inline styles/comments still resolve */
   --color-kd-bg: #132542;
+
+  /*
+    ── HOMEPAGE 2.0 palette ──────────────────────────────────────────────
+    Additive tokens for the new obsidian/mist homepage. Named distinctly
+    so IR/About routes (built on --color-bg / --color-accent / --color-alt)
+    keep rendering exactly as before.
+  */
+  --color-obsidian:   #090D16;   /* deepest dark — Hero, InvestorCallout */
+  --color-obsidian-2: #0B0F19;   /* slightly lifted dark — AI Hub */
+  --color-mist:       #F8FAFC;   /* light section bg — PillarsBento, Fiber, Metrics, Updates */
+  --color-emerald:    #10B981;   /* primary accent for the new palette */
+  --color-cyan-glow:  #22D3EE;   /* radial glow companion */
+
+  /* Slate ramp — used on light (#F8FAFC) sections for text hierarchy & borders */
+  --color-slate-50:   #F8FAFC;
+  --color-slate-100:  #F1F5F9;
+  --color-slate-200:  #E2E8F0;
+  --color-slate-300:  #CBD5E1;
+  --color-slate-400:  #94A3B8;
+  --color-slate-500:  #64748B;
+  --color-slate-600:  #475569;
+  --color-slate-700:  #334155;
+  --color-slate-800:  #1E293B;
+  --color-slate-900:  #0F172A;
 }
 
-@keyframes border-revolve {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/*
+  ── HOMEPAGE 2.0 utilities ────────────────────────────────────────────
+  Small helpers scoped to the new sections. Keep tightly focused so they
+  don't leak into other routes.
+*/
+
+/* Glass panel on OBSIDIAN sections — lighter tint than .glass which is
+   tuned for the deep navy IR/About bg. */
+.glass-obsidian {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.045) 0%,
+      rgba(255, 255, 255, 0) 60%
+    ),
+    rgba(11, 15, 25, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Emerald radial wash — used behind hero copy and callout banners. */
+.glow-emerald {
+  background:
+    radial-gradient(
+      ellipse 60% 55% at 50% 50%,
+      rgba(16, 185, 129, 0.22) 0%,
+      transparent 70%
+    );
+}
+.glow-cyan {
+  background:
+    radial-gradient(
+      ellipse 60% 55% at 50% 50%,
+      rgba(34, 211, 238, 0.18) 0%,
+      transparent 70%
+    );
+}
+
+/* Dot grid — subtle background texture for obsidian sections. */
+.dot-grid-obsidian {
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.dot-grid-mist {
+  background-image:
+    radial-gradient(rgba(15, 23, 42, 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Bento card hover — subtle lift + emerald border glow. */
+.bento-hover {
+  transition:
+    transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 260ms ease-out,
+    border-color 260ms ease-out;
+}
+.bento-hover:hover {
+  transform: translateY(-3px);
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow:
+    0 12px 32px -12px rgba(16, 185, 129, 0.35),
+    0 0 0 1px rgba(16, 185, 129, 0.15);
+}
+
+/* Ticker pulse — for the "live" ISIN / NSE dots. */
+@keyframes ticker-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
+  50%      { opacity: 0.55; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+}
+.ticker-pulse { animation: ticker-pulse 2.2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-pulse { animation: none !important; }
+  .bento-hover { transition: none !important; }
+  .bento-hover:hover { transform: none !important; }
+  /* Hide the whole comet group — SMIL isn't controllable via CSS animation:none */
+  [data-border-orbit] { display: none !important; }
+}
+
+/*
+  ── Border-orbit animation ────────────────────────────────────────────
+  Used by the Footer's comet-trail SVG stroke. Animates the dash offset
+  along an SVG rect's rounded-rect path so the trail moves at constant
+  LINEAR velocity along the perimeter (unlike a rotating conic gradient,
+  which sweeps at constant angular velocity and blips fast on the short
+  edges of wide cards). `pathLength="100"` on the rect normalises the
+  perimeter so 0 → -100 = one full lap regardless of card size.
+*/
+@keyframes border-orbit {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: -100; }
 }
 
 /*
@@ -138,12 +251,12 @@ body {
   background:
     radial-gradient(
       ellipse 900px 500px at 12% 8%,
-      rgba(34, 211, 238, 0.06) 0%,
+      rgba(16, 185, 129, 0.06) 0%,
       transparent 60%
     ),
     radial-gradient(
       ellipse 700px 500px at 88% 92%,
-      rgba(245, 158, 11, 0.04) 0%,
+      rgba(34, 211, 238, 0.05) 0%,
       transparent 60%
     ),
     var(--background);
@@ -163,7 +276,7 @@ body {
    scrolling under it doesn't bleed through. Blur still active for the
    frosted feel where the tint alone doesn't fully cover. */
 .glass-nav {
-  background-color: rgba(4, 8, 15, 0.8);
+  background-color: rgba(9, 13, 22, 0.78);
   border-color: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
@@ -189,16 +302,16 @@ body {
   background:
     linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.05) 0%,
       rgba(255, 255, 255, 0) 60%
     ),
-    rgba(7, 15, 32, 0.9);
+    rgba(11, 15, 25, 0.9);
   border-color: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px) saturate(140%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 8px 32px rgba(0, 0, 0, 0.5);
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 8px 32px rgba(0, 0, 0, 0.55);
 }
 
 @media (min-width: 768px) {
