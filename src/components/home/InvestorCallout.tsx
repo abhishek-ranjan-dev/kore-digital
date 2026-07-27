@@ -28,10 +28,7 @@ export default function InvestorCallout() {
 
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-[1.05] tracking-tight">
                 Real-time updates from the{" "}
-                <span className="bg-gradient-to-r from-emerald to-cyan-glow bg-clip-text text-transparent">
-                  exchange floor
-                </span>
-                .
+                <span className="text-emerald">exchange floor</span>.
               </h2>
 
               <p className="text-white/60 text-base md:text-lg leading-relaxed max-w-xl">
@@ -65,12 +62,12 @@ export default function InvestorCallout() {
                     icon={FileText}
                     label="Recent disclosures"
                   />
-                  <span className="text-[10px] uppercase tracking-widest text-white/40">
+                  <span className="text-[10px] uppercase tracking-widest text-white/60">
                     Auto-synced
                   </span>
                 </div>
 
-                <ul className="space-y-3">
+                <ul className="divide-y divide-white/10 border-y border-white/10">
                   {recent.map((item) => {
                     const href = item.fileUrl?.length
                       ? item.fileUrl
@@ -79,10 +76,10 @@ export default function InvestorCallout() {
                       <li key={item.id}>
                         <Link
                           href={href}
-                          className="group flex items-start gap-3 rounded-lg border border-white/10 bg-white/[0.02] p-4 hover:border-emerald/40 transition-colors"
+                          className="group flex items-start gap-3 rounded-lg -mx-3 px-3 py-3 hover:bg-white/[0.04] transition-colors"
                         >
                           <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-mono uppercase tracking-widest text-white/40 mb-1">
+                            <p className="text-[10px] font-mono uppercase tracking-widest text-white/60 mb-1">
                               {dateFmt.format(new Date(item.date))}
                             </p>
                             <p className="text-sm font-medium text-white group-hover:text-emerald transition-colors line-clamp-2">

@@ -30,21 +30,27 @@ export default function StatBlock({
   accent = false,
   className = "",
 }: StatBlockProps) {
+  // Solid-Ink Rule (DESIGN.md): no gradient-filled text. `accent` is the
+  // confirmation emphasis — emerald on dark (high contrast on obsidian),
+  // ink on light (the legible "ledger" figure; emerald on white would fail
+  // the large-text contrast floor).
   const valueColor = accent
-    ? "bg-gradient-to-br from-emerald to-cyan-glow bg-clip-text text-transparent"
+    ? tone === "dark"
+      ? "text-emerald"
+      : "text-slate-900"
     : tone === "dark"
       ? "text-white"
       : "text-slate-900";
   const unitColor = tone === "dark" ? "text-white/50" : "text-slate-500";
   const labelColor = tone === "dark" ? "text-white/60" : "text-slate-600";
-  const captionColor = tone === "dark" ? "text-white/40" : "text-slate-500";
+  const captionColor = tone === "dark" ? "text-white/55" : "text-slate-500";
 
   const sizeCls =
     size === "hero"
       ? "text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
       : size === "lg"
-        ? "text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem]"
-        : "text-2xl sm:text-3xl md:text-4xl";
+        ? "text-[clamp(1.75rem,5vw,2.75rem)]"
+        : "text-xl sm:text-3xl md:text-4xl";
 
   const unitSize =
     size === "hero"
@@ -65,7 +71,7 @@ export default function StatBlock({
           <span className={`${unitSize} ${unitColor} font-medium`}>{unit}</span>
         ) : null}
       </div>
-      <span className={`text-[11px] uppercase tracking-[0.18em] ${labelColor}`}>
+      <span className={`text-[10px] uppercase tracking-[0.18em] ${labelColor}`}>
         {label}
       </span>
       {caption ? (

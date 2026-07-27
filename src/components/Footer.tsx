@@ -168,11 +168,11 @@ export default function Footer() {
                   </p>
 
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 bg-white/[0.03] border border-white/10 rounded-md px-2.5 py-1 text-[11px] text-white/70">
+                    <span className="inline-flex items-center gap-1.5 bg-white/[0.03] border border-white/10 rounded-md px-2.5 py-1 text-[10px] text-white/70">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald shrink-0" />
                       {keyMetrics.listingExchange} Listed
                     </span>
-                    <span className="inline-flex items-center bg-white/[0.03] border border-white/10 rounded-md px-2.5 py-1 text-[11px] text-emerald font-mono">
+                    <span className="inline-flex items-center bg-white/[0.03] border border-white/10 rounded-md px-2.5 py-1 text-[10px] text-emerald font-mono">
                       {keyMetrics.ticker}
                     </span>
                   </div>

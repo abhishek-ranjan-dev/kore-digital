@@ -12,7 +12,7 @@ export default function RegulatoryStrip() {
   return (
     <section className="bg-obsidian border-y border-white/10 py-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-4 text-[10px] uppercase tracking-[0.22em] text-white/40 font-medium">
+        <div className="flex flex-wrap items-center justify-between gap-4 text-[10px] uppercase tracking-[0.22em] text-white/60 font-medium">
           {items.map((item, i) => {
             const Icon = item.icon;
             return (

@@ -58,7 +58,7 @@ export default function ContactUs() {
                 Kindly email us at{' '}
                 <a
                   href={`mailto:${EMAIL}`}
-                  className="text-emerald hover:text-emerald font-medium transition-colors"
+                  className="text-emerald hover:brightness-110 font-medium underline decoration-emerald/30 underline-offset-2 hover:decoration-emerald transition"
                 >
                   {EMAIL}
                 </a>
@@ -71,7 +71,7 @@ export default function ContactUs() {
                 <button
                   onClick={handleCopy}
                   aria-label="Copy email address to clipboard"
-                  className={`shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all duration-200 ${
+                  className={`shrink-0 inline-flex items-center justify-center gap-1.5 text-xs font-semibold px-3.5 py-2 min-h-[44px] rounded-lg border transition-all duration-200 ${
                     copied
                       ? 'bg-emerald/10 border-emerald/40 text-emerald'
                       : 'bg-white/[0.03] border-white/10 text-white/70 hover:border-emerald/50 hover:text-emerald'
@@ -90,6 +90,9 @@ export default function ContactUs() {
                   )}
                 </button>
               </div>
+              <span role="status" aria-live="polite" className="sr-only">
+                {copied ? "Email address copied to clipboard" : ""}
+              </span>
             </div>
 
             <div className="glass-obsidian rounded-2xl p-6 space-y-4">
@@ -114,7 +117,7 @@ export default function ContactUs() {
                 href={MAP_EXTERNAL_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-emerald hover:brightness-110 font-medium transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs text-emerald hover:brightness-110 font-medium transition"
               >
                 Open in Google Maps ↗
               </a>

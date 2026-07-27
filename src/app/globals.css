@@ -65,6 +65,7 @@
   --color-obsidian-2: #0B0F19;   /* slightly lifted dark — AI Hub */
   --color-mist:       #F8FAFC;   /* light section bg — PillarsBento, Fiber, Metrics, Updates */
   --color-emerald:    #10B981;   /* primary accent for the new palette */
+  --color-emerald-ink: #047857;  /* emerald for TEXT/icons on light (mist/white) surfaces — #10B981 is only ~2.6:1 on white and fails contrast; this passes ~5.6:1. Never use on dark surfaces (use --color-emerald there). */
   --color-cyan-glow:  #22D3EE;   /* radial glow companion */
 
   /* Slate ramp — used on light (#F8FAFC) sections for text hierarchy & borders */
@@ -162,6 +163,10 @@
   .bento-hover:hover { transform: none !important; }
   /* Hide the whole comet group — SMIL isn't controllable via CSS animation:none */
   [data-border-orbit] { display: none !important; }
+  /* Decorative traveling/rotating SVG motion (hero mesh comets & orbit dots,
+     fiber route pulses). Same reason: SMIL ignores animation:none, so the
+     large-motion groups opt in here and are hidden. Static structure remains. */
+  [data-motion-decor] { display: none !important; }
 }
 
 /*
@@ -206,13 +211,15 @@
 .mount-fade-up-delay-3 { animation-delay: 450ms; }
 
 /*
-  ── Scroll-reveal defaults ────────────────────────────────────────────
+  ── Scroll-reveal ─────────────────────────────────────────────────────
   The <Reveal> client component sets `data-reveal="in"` on its wrapper
-  when it enters the viewport. Inline styles on the component handle the
-  actual opacity/transform per-props; this rule is a defensive fallback
-  in case JS hasn't hydrated yet — ensures content isn't stuck invisible.
+  when it enters the viewport and drives the opacity/transform transition
+  via inline styles. `will-change` is scoped to elements that have NOT yet
+  revealed — a compositor hint only while the animation is imminent. Once
+  an element is revealed (at rest) the hint is dropped, so we don't hold a
+  layer on every reveal element for the life of the page.
 */
-[data-reveal] { will-change: opacity, transform; }
+[data-reveal]:not([data-reveal="in"]) { will-change: opacity, transform; }
 
 /*
   ── Reduced-motion guard ──────────────────────────────────────────────
@@ -240,6 +247,24 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 64px;
+}
+
+/*
+  ── Keyboard focus ────────────────────────────────────────────────────
+  A single visible focus ring for every interactive element. Components
+  defined :hover states but relied on the UA outline for keyboard focus;
+  this makes focus a first-class, on-brand state. Emerald reads ~8:1 on
+  obsidian and is clearly visible on mist; the offset keeps it clear of
+  the element edge on both.
+*/
+:focus-visible {
+  outline: 2px solid var(--color-emerald);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* Only suppress the ring for genuine non-keyboard focus. */
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 body {

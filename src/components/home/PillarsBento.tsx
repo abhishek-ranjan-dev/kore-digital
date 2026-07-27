@@ -90,7 +90,7 @@ export default function PillarsBento() {
                 className="group min-h-[280px]"
               >
                 <CornerIcon
-                  className="absolute top-6 right-6 w-9 h-9 text-slate-300 group-hover:text-emerald transition-colors"
+                  className="absolute top-6 right-6 w-9 h-9 text-slate-300 group-hover:text-emerald-ink transition-colors"
                   strokeWidth={1.5}
                 />
 
@@ -115,7 +115,7 @@ export default function PillarsBento() {
                   {pillar.description}
                 </p>
 
-                <div className="mt-8 pt-6 border-t border-slate-200 flex items-center gap-2 text-sm font-semibold text-slate-900 group-hover:text-emerald transition-colors">
+                <div className="mt-8 pt-6 border-t border-slate-200 flex items-center gap-2 text-sm font-semibold text-slate-900 group-hover:text-emerald-ink transition-colors">
                   Explore
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </div>
