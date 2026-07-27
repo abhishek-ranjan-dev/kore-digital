@@ -41,13 +41,17 @@ export default function StatBlock({
 
   const sizeCls =
     size === "hero"
-      ? "text-6xl md:text-7xl lg:text-8xl"
+      ? "text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
       : size === "lg"
-        ? "text-[2.25rem] md:text-[2.75rem]"
-        : "text-3xl md:text-4xl";
+        ? "text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem]"
+        : "text-2xl sm:text-3xl md:text-4xl";
 
   const unitSize =
-    size === "hero" ? "text-3xl md:text-4xl" : size === "lg" ? "text-lg md:text-xl" : "text-base";
+    size === "hero"
+      ? "text-2xl sm:text-3xl md:text-4xl"
+      : size === "lg"
+        ? "text-sm sm:text-lg md:text-xl"
+        : "text-sm sm:text-base";
 
   return (
     <div className={`flex w-full flex-col gap-2 ${className}`}>

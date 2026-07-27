@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, ChevronRight } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 const navLinks = [
   { label: "About", href: "/about" },
@@ -84,35 +85,71 @@ export default function Header() {
         </div>
       </div>
 
-      {mobileOpen && (
-        <div className="glass-nav md:hidden border-t">
-          <div className="px-4 py-4 space-y-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`block py-2.5 px-3 rounded text-sm transition-colors ${
-                  link.highlight
-                    ? "text-emerald font-semibold hover:bg-emerald/10"
-                    : "text-white/70 hover:text-white hover:bg-white/5"
-                }`}
-                onClick={() => setMobileOpen(false)}
+      <AnimatePresence initial={false}>
+        {mobileOpen && (
+          <motion.div
+            key="mobile-menu"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{
+              height: { duration: 0.32, ease: [0.4, 0, 0.2, 1] },
+              opacity: { duration: 0.22, ease: "easeOut" },
+            }}
+            className="md:hidden overflow-hidden border-t border-white/10 bg-obsidian"
+          >
+            <motion.nav
+              className="px-4 py-4 space-y-1"
+              initial="closed"
+              animate="open"
+              exit="closed"
+              variants={{
+                open: { transition: { staggerChildren: 0.05, delayChildren: 0.06 } },
+                closed: {},
+              }}
+            >
+              {navLinks.map((link) => (
+                <motion.div
+                  key={link.href}
+                  variants={{
+                    open: { opacity: 1, y: 0 },
+                    closed: { opacity: 0, y: -6 },
+                  }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                >
+                  <Link
+                    href={link.href}
+                    className={`block py-2.5 px-3 rounded text-sm transition-colors ${
+                      link.highlight
+                        ? "text-emerald font-semibold hover:bg-emerald/10"
+                        : "text-white/70 hover:text-white hover:bg-white/5"
+                    }`}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                </motion.div>
+              ))}
+              <motion.div
+                className="pt-3"
+                variants={{
+                  open: { opacity: 1, y: 0 },
+                  closed: { opacity: 0, y: -6 },
+                }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
               >
-                {link.label}
-              </Link>
-            ))}
-            <div className="pt-3">
-              <Link
-                href="/contact"
-                className="block bg-emerald hover:brightness-110 text-obsidian font-bold text-sm px-4 py-3 rounded text-center transition-all"
-                onClick={() => setMobileOpen(false)}
-              >
-                Get in Touch
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
+                <Link
+                  href="/contact"
+                  className="block bg-emerald hover:brightness-110 text-obsidian font-bold text-sm px-4 py-3 rounded text-center transition-all"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Get in Touch
+                </Link>
+              </motion.div>
+            </motion.nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

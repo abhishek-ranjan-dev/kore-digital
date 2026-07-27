@@ -23,10 +23,10 @@ export default function BentoCard({
   const base =
     tone === "dark"
       ? "bg-white/[0.02] border-white/10"
-      : "bg-white border-slate-200";
+      : "bg-gradient-to-b from-white to-slate-50 border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_10px_30px_-16px_rgba(15,23,42,0.18)]";
 
   const shared =
-    `relative flex flex-col overflow-hidden rounded-2xl border p-6 md:p-8 ${base} bento-hover ${className}`;
+    `relative flex flex-col overflow-hidden rounded-2xl border p-5 sm:p-6 md:p-8 ${base} bento-hover ${className}`;
 
   if (href) {
     return (
