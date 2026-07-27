@@ -12,7 +12,6 @@ import {
   X,
   Download,
   ExternalLink,
-  Landmark,
   Users,
 } from "lucide-react";
 import Header from "@/components/Header";
@@ -171,13 +170,10 @@ export default function InvestorRelationsPage() {
             </div>
 
             <div className="space-y-6">
-              <SectionBadge icon={Landmark} label="Investor Relations" tone="dark" />
               <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white tracking-tight leading-[0.95] drop-shadow-lg">
                 Investor
                 <br />
-                <span className="bg-gradient-to-r from-emerald to-cyan-glow bg-clip-text text-transparent">
-                  Relations
-                </span>
+                <span className="text-emerald">Relations</span>
               </h1>
               <p className="text-white/70 text-base md:text-lg leading-relaxed max-w-2xl">
                 Kore Digital Limited&apos;s complete compliance repository —
@@ -407,7 +403,7 @@ function AgentCard({
   return (
     <div className="group relative h-full flex flex-col bg-white border border-slate-200 rounded-2xl p-6 md:p-8 bento-hover">
       <div className="w-11 h-11 rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center mb-6 group-hover:border-emerald/60 group-hover:bg-emerald/10 transition-colors">
-        <Icon className="w-4 h-4 text-emerald" />
+        <Icon className="w-4 h-4 text-emerald-ink" />
       </div>
 
       <p className="text-slate-500 text-[10px] font-mono tracking-[0.25em] uppercase mb-3">
@@ -427,7 +423,7 @@ function AgentCard({
         {...(isExternal
           ? { target: "_blank", rel: "noopener noreferrer" }
           : {})}
-        className="inline-flex items-center gap-1.5 text-sm text-slate-700 group-hover:text-emerald transition-colors self-start w-full mt-auto pt-4 border-t border-slate-200 group-hover:border-emerald/40"
+        className="inline-flex items-center gap-1.5 text-sm text-slate-700 group-hover:text-emerald-ink transition-colors self-start w-full mt-auto pt-4 border-t border-slate-200 group-hover:border-emerald/40"
       >
         <span>{action.label}</span>
         <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -522,7 +518,7 @@ function FinancialsView() {
             </tbody>
           </table>
         </div>
-        <p className="text-white/40 text-[10px] font-mono tracking-[0.25em] uppercase mt-6 max-w-2xl leading-relaxed">
+        <p className="text-white/60 text-[10px] font-mono tracking-[0.25em] uppercase mt-6 max-w-2xl leading-relaxed">
           All figures are standalone, sourced verbatim from each year&apos;s
           audited annual report.
         </p>
@@ -745,7 +741,7 @@ function ReportDrawerContent({
               ))}
             </div>
 
-            <p className="text-white/50 text-[11px] leading-relaxed pt-2">
+            <p className="text-white/50 text-[10px] leading-relaxed pt-2">
               All figures are standalone, sourced verbatim from the audited
               annual report for {formatFY(report.year)}. Refer to the full
               PDF for detailed segment reporting, cash-flow statement, and
@@ -867,7 +863,7 @@ function GovernanceSection() {
               01 · Board Composition
             </p>
 
-            <p className="text-white/50 text-[9px] font-mono tracking-[0.28em] uppercase mb-2.5">
+            <p className="text-white/50 text-[10px] font-mono tracking-[0.28em] uppercase mb-2.5">
               Executive Leadership
             </p>
             <ul className="divide-y divide-white/10 border-y border-white/10 mb-6">
@@ -883,7 +879,7 @@ function GovernanceSection() {
               ))}
             </ul>
 
-            <p className="text-white/50 text-[9px] font-mono tracking-[0.28em] uppercase mb-2.5">
+            <p className="text-white/50 text-[10px] font-mono tracking-[0.28em] uppercase mb-2.5">
               Independent Oversight
             </p>
             <ul className="divide-y divide-white/10 border-y border-white/10">
@@ -910,7 +906,7 @@ function GovernanceSection() {
               02 · Statutory Committees
             </p>
 
-            <p className="text-white/50 text-[9px] font-mono tracking-[0.28em] uppercase mb-2.5">
+            <p className="text-white/50 text-[10px] font-mono tracking-[0.28em] uppercase mb-2.5">
               Mandatory Under Companies Act &amp; SEBI LODR
             </p>
             <ul className="divide-y divide-white/10 border-y border-white/10">
@@ -954,13 +950,13 @@ function GovernanceSection() {
               </div>
             </div>
 
-            <p className="text-emerald text-[9px] font-mono tracking-[0.28em] uppercase mb-4">
+            <p className="text-emerald text-[10px] font-mono tracking-[0.28em] uppercase mb-4">
               [ SEBI LODR Regulation 6 Compliant ]
             </p>
 
             <dl className="border-t border-white/10 pt-4 space-y-3">
               <div>
-                <dt className="text-white/50 text-[9px] font-mono tracking-[0.28em] uppercase mb-1">
+                <dt className="text-white/50 text-[10px] font-mono tracking-[0.28em] uppercase mb-1">
                   Email Desk
                 </dt>
                 <dd>
@@ -975,7 +971,7 @@ function GovernanceSection() {
               </div>
 
               <div>
-                <dt className="text-white/50 text-[9px] font-mono tracking-[0.28em] uppercase mb-1">
+                <dt className="text-white/50 text-[10px] font-mono tracking-[0.28em] uppercase mb-1">
                   Registered Office
                 </dt>
                 <dd className="text-white/80 text-sm leading-snug">
@@ -1037,7 +1033,7 @@ function PoliciesSection() {
             if (items.length === 0) return null;
             return (
               <div key={group.heading}>
-                <p className="text-emerald text-[10px] font-mono tracking-[0.28em] uppercase mb-5 flex items-center gap-3">
+                <p className="text-emerald-ink text-[10px] font-mono tracking-[0.28em] uppercase mb-5 flex items-center gap-3">
                   <span
                     aria-hidden="true"
                     className="inline-block w-6 h-px bg-emerald/60"
@@ -1057,14 +1053,14 @@ function PoliciesSection() {
                         className="text-left w-full group h-full flex flex-col bg-white border border-slate-200 rounded-2xl p-6 bento-hover cursor-pointer"
                       >
                         <div className="w-10 h-10 rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center mb-5 group-hover:border-emerald/50 group-hover:bg-emerald/10 transition-colors">
-                          <FileText className="w-4 h-4 text-emerald" />
+                          <FileText className="w-4 h-4 text-emerald-ink" />
                         </div>
 
                         <p className="text-slate-900 text-sm md:text-base font-semibold tracking-tight leading-snug mb-6">
                           {policy.title}
                         </p>
 
-                        <span className="mt-auto inline-flex items-center gap-1.5 text-xs text-slate-700 group-hover:text-emerald transition-colors">
+                        <span className="mt-auto inline-flex items-center gap-1.5 text-xs text-slate-700 group-hover:text-emerald-ink transition-colors">
                           View Policy
                           <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                         </span>

@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-27T00:00:00Z",
+  "title": "Design System: Kore Digital",
+  "extensions": {
+    "colorMeta": {
+      "obsidian": {
+        "role": "neutral",
+        "displayName": "Obsidian",
+        "canonical": "#090D16",
+        "tonalRamp": ["#05070C", "#090D16", "#0B0F19", "#111726", "#1B2436", "#2B3752", "#4A5B7C", "#8A98B4"]
+      },
+      "obsidian-2": {
+        "role": "neutral",
+        "displayName": "Obsidian Lifted",
+        "canonical": "#0B0F19",
+        "tonalRamp": ["#06080F", "#0B0F19", "#121826", "#1A2233", "#28324A", "#3C4A68", "#5C6E92", "#96A3BE"]
+      },
+      "emerald": {
+        "role": "primary",
+        "displayName": "Confirmation Emerald",
+        "canonical": "#10B981",
+        "tonalRamp": ["#052E22", "#064E3B", "#065F46", "#047857", "#059669", "#10B981", "#4ADAA9", "#A7F3D6"]
+      },
+      "emerald-ink": {
+        "role": "primary",
+        "displayName": "Emerald Ink",
+        "canonical": "#047857",
+        "tonalRamp": ["#052E22", "#064E3B", "#065F46", "#047857", "#059669", "#10B981", "#4ADAA9", "#A7F3D6"]
+      },
+      "cyan-glow": {
+        "role": "secondary",
+        "displayName": "Cyan Glow",
+        "canonical": "#22D3EE",
+        "tonalRamp": ["#083344", "#0E5063", "#137285", "#1793A8", "#1EB4CC", "#22D3EE", "#67E3F5", "#A5EEFA"]
+      },
+      "mist": {
+        "role": "neutral",
+        "displayName": "Mist",
+        "canonical": "#F8FAFC",
+        "tonalRamp": ["#0F172A", "#1E293B", "#334155", "#64748B", "#94A3B8", "#CBD5E1", "#E2E8F0", "#F8FAFC"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#0F172A",
+        "tonalRamp": ["#020617", "#0F172A", "#1E293B", "#334155", "#475569", "#64748B", "#94A3B8", "#CBD5E1"]
+      },
+      "slate-600": {
+        "role": "neutral",
+        "displayName": "Slate Body",
+        "canonical": "#475569",
+        "tonalRamp": ["#0F172A", "#1E293B", "#334155", "#475569", "#64748B", "#94A3B8", "#CBD5E1", "#E2E8F0"]
+      },
+      "slate-500": {
+        "role": "neutral",
+        "displayName": "Slate Muted",
+        "canonical": "#64748B",
+        "tonalRamp": ["#1E293B", "#334155", "#475569", "#64748B", "#94A3B8", "#CBD5E1", "#E2E8F0", "#F1F5F9"]
+      },
+      "slate-200": {
+        "role": "neutral",
+        "displayName": "Slate Hairline",
+        "canonical": "#E2E8F0",
+        "tonalRamp": ["#334155", "#475569", "#64748B", "#94A3B8", "#CBD5E1", "#E2E8F0", "#F1F5F9", "#F8FAFC"]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": ["#94A3B8", "#CBD5E1", "#E2E8F0", "#F1F5F9", "#F8FAFC", "#FCFDFE", "#FFFFFF", "#FFFFFF"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page hero H1. IR hero pushes to text-8xl / line-height 0.95." },
+      "headline": { "displayName": "Headline", "purpose": "Section H2, constrained to max-w-3xl." },
+      "title": { "displayName": "Title", "purpose": "Card and subsection H3." },
+      "body": { "displayName": "Body", "purpose": "Paragraph copy — white/70 on dark, slate-600 on light." },
+      "label": { "displayName": "Ledger Kicker", "purpose": "Geist Mono uppercase filing-style eyebrow at 0.32em tracking." }
+    },
+    "shadows": [
+      { "name": "ledger-ambient", "value": "0 1px 2px rgba(15,23,42,0.04), 0 10px 30px -16px rgba(15,23,42,0.18)", "purpose": "Resting shadow on white cards over mist — paper on paper." },
+      { "name": "emerald-lift", "value": "0 12px 32px -12px rgba(16,185,129,0.35), 0 0 0 1px rgba(16,185,129,0.15)", "purpose": "Hover-only lift on interactive cards, paired with translateY(-3px)." },
+      { "name": "glass-panel", "value": "inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.55)", "purpose": "Opted-in glass surfaces — contact cards, fixed nav." }
+    ],
+    "motion": [
+      { "name": "bento-ease", "value": "cubic-bezier(0.2, 0.7, 0.2, 1)", "purpose": "Card hover lift (transform 260ms)." },
+      { "name": "menu-ease", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Mobile nav height reveal (~320ms)." },
+      { "name": "reveal", "value": "ease-out", "purpose": "Scroll reveal opacity+translate, 500ms, staggered by index." },
+      { "name": "ticker-pulse", "value": "2.2s ease-in-out infinite", "purpose": "Live/listed emerald dot — opacity + expanding halo." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Emerald-fill CTA with near-black text; brightens on hover, never changes hue.",
+      "html": "<button class=\"ds-btn-primary\">Investor Relations <svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 18l6-6-6-6\"/></svg></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; background: #10B981; color: #090D16; font-family: Geist, system-ui, sans-serif; font-weight: 700; font-size: 0.875rem; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; transition: filter 0.2s ease, transform 0.2s ease; } .ds-btn-primary:hover { filter: brightness(1.1); } .ds-btn-primary:focus-visible { outline: 2px solid #10B981; outline-offset: 2px; } .ds-btn-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action; hairline border and text both swap to solid emerald on hover, no fill.",
+      "html": "<button class=\"ds-btn-outline\">Explore Capabilities</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: #ffffff; font-family: Geist, system-ui, sans-serif; font-weight: 600; font-size: 0.875rem; padding: 12px 24px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer; transition: color 0.2s ease, border-color 0.2s ease; } .ds-btn-outline:hover { color: #10B981; border-color: #10B981; } .ds-btn-outline:focus-visible { outline: 2px solid #10B981; outline-offset: 2px; }"
+    },
+    {
+      "name": "Section Badge",
+      "kind": "chip",
+      "refersTo": "badge-light",
+      "description": "Filing-style kicker pill; Geist Mono-adjacent uppercase at wide tracking, optional leading icon.",
+      "html": "<span class=\"ds-badge\"><svg viewBox=\"0 0 24 24\" width=\"12\" height=\"12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 7l-8.5 8.5-5-5L2 17\"/><path d=\"M16 7h6v6\"/></svg>Latest Financial Cycle</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; gap: 8px; background: #ffffff; color: #64748B; border: 1px solid #E2E8F0; border-radius: 9999px; padding: 4px 12px; font-family: Geist, system-ui, sans-serif; font-size: 0.625rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.18em; }"
+    },
+    {
+      "name": "Ledger Metric Card",
+      "kind": "card",
+      "refersTo": "card-light",
+      "description": "Signature block: mono kicker over a heavy solid-color tabular metric with a muted unit sibling.",
+      "html": "<div class=\"ds-metric\"><span class=\"ds-metric-kicker\">Total Income</span><div class=\"ds-metric-row\"><span class=\"ds-metric-value\">₹327.82</span><span class=\"ds-metric-unit\">Cr</span></div><span class=\"ds-metric-label\">FY25 Consolidated</span></div>",
+      "css": ".ds-metric { display: flex; flex-direction: column; gap: 10px; background: linear-gradient(to bottom, #ffffff, #F8FAFC); border: 1px solid #E2E8F0; border-radius: 16px; padding: 28px; box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 10px 30px -16px rgba(15,23,42,0.18); min-width: 180px; } .ds-metric-kicker { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.28em; color: #64748B; } .ds-metric-row { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; } .ds-metric-value { font-family: Geist, system-ui, sans-serif; font-weight: 700; font-size: 2.75rem; line-height: 1; letter-spacing: -0.02em; color: #10B981; font-variant-numeric: tabular-nums; } .ds-metric-unit { font-size: 1.25rem; font-weight: 500; color: #64748B; } .ds-metric-label { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.18em; color: #475569; }"
+    },
+    {
+      "name": "Bento Card",
+      "kind": "card",
+      "refersTo": "card-dark",
+      "description": "Flat-at-rest feature card; lifts with an emerald border + glow only on hover.",
+      "html": "<div class=\"ds-bento\"><span class=\"ds-bento-kicker\">Pillar 02</span><h3 class=\"ds-bento-title\">AI Datacenter</h3><p class=\"ds-bento-body\">1 GW of AI-ready compute — liquid-cooled, GPU-dense, renewable-first.</p></div>",
+      "css": ".ds-bento { display: flex; flex-direction: column; gap: 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 32px; transition: transform 260ms cubic-bezier(0.2,0.7,0.2,1), box-shadow 260ms ease-out, border-color 260ms ease-out; } .ds-bento:hover { transform: translateY(-3px); border-color: rgba(16,185,129,0.45); box-shadow: 0 12px 32px -12px rgba(16,185,129,0.35), 0 0 0 1px rgba(16,185,129,0.15); } .ds-bento-kicker { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.28em; color: rgba(255,255,255,0.5); } .ds-bento-title { margin: 0; font-family: Geist, system-ui, sans-serif; font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em; color: #ffffff; } .ds-bento-body { margin: 0; font-size: 0.9375rem; line-height: 1.625; color: rgba(255,255,255,0.7); }"
+    },
+    {
+      "name": "Filing Tab",
+      "kind": "nav",
+      "refersTo": "tab-active",
+      "description": "Underline tab on a hairline rail; active state recolors in place (no sliding indicator).",
+      "html": "<div class=\"ds-tabs\"><button class=\"ds-tab ds-tab-active\">Financial Performance</button><button class=\"ds-tab\">Exchange Disclosures</button></div>",
+      "css": ".ds-tabs { display: flex; gap: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); } .ds-tab { background: transparent; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 0 0 20px; font-family: Geist, system-ui, sans-serif; font-weight: 600; font-size: 0.9375rem; letter-spacing: -0.01em; color: rgba(255,255,255,0.5); cursor: pointer; transition: color 0.2s ease, border-color 0.2s ease; } .ds-tab:hover { color: rgba(255,255,255,0.8); } .ds-tab-active { color: #ffffff; border-bottom-color: #10B981; }"
+    },
+    {
+      "name": "Live Pill",
+      "kind": "chip",
+      "refersTo": "badge-dark",
+      "description": "NSE 'live/listed' status pill with a pulsing emerald dot.",
+      "html": "<span class=\"ds-live\"><span class=\"ds-live-dot\"></span>NSE Live · KOREDIGIT</span>",
+      "css": ".ds-live { display: inline-flex; align-items: center; gap: 8px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 9999px; padding: 4px 12px; font-family: Geist, system-ui, sans-serif; font-size: 0.625rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.22em; color: #10B981; } .ds-live-dot { width: 6px; height: 6px; border-radius: 9999px; background: #10B981; animation: ds-ticker-pulse 2.2s ease-in-out infinite; } @keyframes ds-ticker-pulse { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.55); } 50% { opacity: 0.55; box-shadow: 0 0 0 6px rgba(16,185,129,0); } }"
+    },
+    {
+      "name": "Status Chip — In Progress",
+      "kind": "chip",
+      "refersTo": "badge-dark",
+      "description": "On-track status pill with a live ping dot; sibling variants are Upcoming (outline) and Completed (muted).",
+      "html": "<span class=\"ds-status\"><span class=\"ds-status-ping\"><span class=\"ds-status-ping-outer\"></span><span class=\"ds-status-ping-inner\"></span></span>In Progress</span>",
+      "css": ".ds-status { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.4); border-radius: 9999px; padding: 4px 10px; font-family: Geist, system-ui, sans-serif; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: #10B981; } .ds-status-ping { position: relative; display: inline-flex; width: 6px; height: 6px; } .ds-status-ping-outer { position: absolute; inset: 0; border-radius: 9999px; background: #10B981; opacity: 0.8; animation: ds-ping 1.4s cubic-bezier(0,0,0.2,1) infinite; } .ds-status-ping-inner { position: relative; width: 6px; height: 6px; border-radius: 9999px; background: #10B981; } @keyframes ds-ping { 75%,100% { transform: scale(2.2); opacity: 0; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Investment-Grade Ledger",
+    "overview": "Kore Digital is an NSE-listed deep-tech infrastructure operator, and the site is built to be believed by institutions and regulators before it is admired. The system reads like a listed company's annual report elevated to a screen: an obsidian story that frames capability and ambition, interrupted by mist ledgers — clean, near-white sections where the audited numbers stand in the open and can be checked. The two surfaces alternate down every page, and that rhythm is the identity: dark for narrative, light for accountability. Emerald is the only chromatic voice, deployed as confirmation — the 'live', 'listed', 'verified', 'on-track' signal — never as decoration. Type is Geist with tight tracking and heavy weight for headlines, and Geist Mono in wide-tracked uppercase for the ledger kickers that give it filing-document precision. The anti-reference is the hype startup — neon spectacle, rainbow gradients on text, motion that performs rather than informs.",
+    "keyCharacteristics": [
+      "Obsidian narrative sections alternating with mist 'ledger' sections, joined by hairline slate-200 borders and gradient fades to obsidian.",
+      "Emerald (#10B981) as the single accent, reserved for confirmation/live states and primary action.",
+      "Geist bold + tight tracking for headlines; Geist Mono wide-tracked uppercase for filing-style kickers.",
+      "Flat-by-default surfaces; a subtle lift + emerald glow only on hover.",
+      "Restrained, functional motion — scroll reveals, count-ups, a single live pulse."
+    ],
+    "rules": [
+      { "name": "The One Signal Rule", "body": "Emerald is confirmation, not decoration. On any given screen it covers well under ~10% of the surface — actions, live states, and at most one accent word. If emerald is doing anything you couldn't label 'verified / live / go', it's misused.", "section": "colors" },
+      { "name": "The Cyan-Is-Light Rule", "body": "cyan-glow may only appear as background light (radial washes, the comet tail) — never as text, never as a button.", "section": "colors" },
+      { "name": "The Emerald-on-Light Rule", "body": "Emerald as text or an icon on a light surface uses Emerald Ink (#047857, ~5.6:1), never #10B981 (~2.6:1, which fails even the large-text floor). On obsidian it reverses — #10B981 for its glow.", "section": "colors" },
+      { "name": "The Alternation Rule", "body": "Sections are either obsidian (story) or mist (ledger); they alternate, and every mist↔obsidian seam is a border-y border-slate-200 hairline or a to-obsidian gradient fade.", "section": "colors" },
+      { "name": "The Filing-Kicker Rule", "body": "Every major section is announced by a Geist Mono uppercase kicker at ~0.28–0.32em tracking. It is the single most recognizable type signature in the system — don't set it in the sans body font.", "section": "typography" },
+      { "name": "The Solid-Ink Rule", "body": "Text is a single solid color — emerald for an accent word, otherwise ink/white per surface. No gradient-filled text, anywhere, at any size. This retires the incumbent emerald→cyan bg-clip-text treatment on hero words and metric figures.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "A surface earns a shadow only by being interactive and hovered. If it isn't responding to the pointer, it has a border, not a shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do alternate obsidian narrative sections with mist ledger sections, and seam every transition with a border-y border-slate-200 hairline or a to-obsidian gradient fade.",
+      "Do reserve emerald for confirmation — actions, live/listed states, on-track chips, and at most one accent word per headline (The One Signal Rule).",
+      "Do announce every major section with a Geist Mono uppercase kicker at ~0.28–0.32em tracking.",
+      "Do set metric figures in solid color, tabular-nums, with the unit as a smaller muted baseline-aligned sibling; keep them responsive so Cr/% never clip.",
+      "Do keep surfaces flat at rest and let cards lift (translateY(-3px) + emerald border/glow) only on hover.",
+      "Do use Emerald Ink (#047857) for emerald text/icons on mist/white; keep #10B981 for dark surfaces, fills, and dots (The Emerald-on-Light Rule).",
+      "Do give every interactive element a visible :focus-visible ring (2px emerald, 2px offset) — keyboard focus is a first-class state, not the UA default.",
+      "Do present forward-looking specs (AI-hub capacity, PUE, FY27) visibly framed as targets/roadmap — never blended into audited-results type."
+    ],
+    "donts": [
+      "Don't use gradient-filled text anywhere — retire the emerald→cyan bg-clip-text on hero words and metric numbers in favor of solid emerald or ink (The Solid-Ink Rule).",
+      "Don't promote cyan-glow to a text or button color; it is atmospheric light only.",
+      "Don't introduce a second accent hue, a shadow ladder on resting surfaces, or motion that performs rather than informs.",
+      "Don't let the mobile nav panel be translucent — page content bleeding through breaks the composure; keep it solid bg-obsidian.",
+      "Don't set section kickers in the sans body font or at tight tracking — the wide-tracked mono is the point.",
+      "Don't alter a figure sourced in src/data/*.ts to fit a layout; the audited number wins."
+    ]
+  }
+}

@@ -33,9 +33,7 @@ export default function HeroDark() {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.05] tracking-tight">
                 Architecting India&apos;s
                 <br />
-                <span className="bg-gradient-to-r from-emerald to-cyan-glow bg-clip-text text-transparent">
-                  Deep-Tech
-                </span>
+                <span className="text-emerald">Deep-Tech</span>
                 <br />
                 Infrastructure.
               </h1>
@@ -63,7 +61,7 @@ export default function HeroDark() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">
+            <div className="grid grid-cols-3 gap-3 sm:gap-6 pt-8 border-t border-white/10">
               <StatBlock
                 tone="dark"
                 size="md"
@@ -146,6 +144,7 @@ function NetworkMesh() {
       <path d="M 435,435 Q 375,380 280,260" stroke="#22D3EE" strokeWidth="0.5" fill="none" strokeOpacity="0.28" />
       <path d="M 100,430 Q 170,380 280,260" stroke="#10B981" strokeWidth="0.5" fill="none" strokeOpacity="0.3" />
 
+      <g data-motion-decor>
       <path
         d="M 85,100 Q 155,185 280,260"
         stroke="#10B981"
@@ -236,6 +235,7 @@ function NetworkMesh() {
           repeatCount="indefinite"
         />
       </path>
+      </g>
 
       <circle cx="280" cy="260" r="108" stroke="#10B981" strokeWidth="0.5" fill="none" strokeOpacity="0.14" strokeDasharray="8 5" />
       <circle cx="280" cy="260" r="80" stroke="#22D3EE" strokeWidth="0.5" fill="none" strokeOpacity="0.2" strokeDasharray="4 7" />
@@ -254,12 +254,14 @@ function NetworkMesh() {
         <animate attributeName="r" values="7;9;7" dur="2.6s" repeatCount="indefinite" />
       </circle>
 
-      <circle cx="388" cy="260" r="4.5" fill="#22D3EE" filter="url(#soft-glow-cyan)">
-        <animateTransform attributeName="transform" type="rotate" from="0 280 260" to="360 280 260" dur="10s" repeatCount="indefinite" />
-      </circle>
-      <circle cx="352" cy="260" r="3" fill="#10B981" filter="url(#soft-glow-emerald)">
-        <animateTransform attributeName="transform" type="rotate" from="180 280 260" to="-180 280 260" dur="14s" repeatCount="indefinite" />
-      </circle>
+      <g data-motion-decor>
+        <circle cx="388" cy="260" r="4.5" fill="#22D3EE" filter="url(#soft-glow-cyan)">
+          <animateTransform attributeName="transform" type="rotate" from="0 280 260" to="360 280 260" dur="10s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="352" cy="260" r="3" fill="#10B981" filter="url(#soft-glow-emerald)">
+          <animateTransform attributeName="transform" type="rotate" from="180 280 260" to="-180 280 260" dur="14s" repeatCount="indefinite" />
+        </circle>
+      </g>
 
       <g>
         <circle cx="85" cy="100" r="26" fill="#090D16" stroke="#10B981" strokeWidth="1.5" />

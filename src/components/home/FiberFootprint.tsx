@@ -70,11 +70,19 @@ function CityNode({
 
   return (
     <g
+      role="button"
+      tabIndex={0}
+      aria-label={`${city.name}: ${city.km}`}
       onMouseEnter={() => onEnter(city.id)}
       onMouseLeave={onLeave}
-      className="cursor-pointer"
+      onFocus={() => onEnter(city.id)}
+      onBlur={onLeave}
+      onClick={() => onEnter(city.id)}
+      className="cursor-pointer focus:outline-none focus-visible:outline-none"
       style={{ pointerEvents: "all" }}
     >
+      {/* Invisible enlarged tap/hit target — the visible dot is small. */}
+      <circle cx={city.x} cy={city.y} r={14} fill="transparent" />
       <circle
         cx={city.x}
         cy={city.y}
@@ -88,8 +96,9 @@ function CityNode({
         cy={city.y}
         r={6}
         fill="#FFFFFF"
-        stroke="#10B981"
+        stroke={hovered ? "#047857" : "#10B981"}
         strokeWidth={2}
+        style={{ transition: "stroke 200ms ease" }}
       />
       <circle cx={city.x} cy={city.y} r={2} fill="#10B981" />
       <text
@@ -107,9 +116,9 @@ function CityNode({
         <text
           x={city.x}
           y={kmY}
-          fontSize={9}
-          fill="#10B981"
-          fontWeight={600}
+          fontSize={10}
+          fill="#047857"
+          fontWeight={700}
           textAnchor="middle"
           style={{ pointerEvents: "none" }}
         >
@@ -192,8 +201,8 @@ export default function FiberFootprint() {
             <svg
               viewBox="0 0 500 560"
               className="w-full max-w-[560px] mx-auto"
-              role="img"
-              aria-label="Kore Digital fiber footprint across India"
+              role="group"
+              aria-label="Kore Digital fiber footprint across India — focus a city to reveal its route length"
             >
               <defs>
                 <pattern
@@ -243,7 +252,7 @@ export default function FiberFootprint() {
                 ))}
               </g>
 
-              <g>
+              <g data-motion-decor>
                 {ROUTES.map((r) => (
                   <circle key={`pulse-${r.id}`} r={3} fill="#10B981">
                     <animateMotion

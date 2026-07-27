@@ -39,14 +39,14 @@ const STATUS_STYLES: Record<
     label: "Completed",
   },
   "In Progress": {
-    badge: "bg-emerald/10 border border-emerald/40 text-emerald",
+    badge: "bg-emerald/10 border border-emerald/40 text-emerald-ink",
     icon: Radio,
     dot: "bg-emerald",
     ring: "ring-emerald/25",
     label: "In Progress",
   },
   Upcoming: {
-    badge: "bg-white border border-emerald/30 text-emerald",
+    badge: "bg-white border border-emerald/30 text-emerald-ink",
     icon: Clock,
     dot: "bg-emerald/70",
     ring: "ring-emerald/20",
@@ -58,10 +58,10 @@ const PILLAR_STYLES: Record<
   TimelineEvent["pillar"],
   { color: string; bg: string }
 > = {
-  Telecom: { color: "text-emerald", bg: "bg-emerald/10 border-emerald/25" },
+  Telecom: { color: "text-emerald-ink", bg: "bg-emerald/10 border-emerald/25" },
   Compute: { color: "text-cyan-glow", bg: "bg-cyan-glow/10 border-cyan-glow/25" },
   "Deep-Tech": {
-    color: "text-emerald",
+    color: "text-emerald-ink",
     bg: "bg-emerald/10 border-emerald/25",
   },
   General: { color: "text-slate-700", bg: "bg-white border-slate-200" },
@@ -82,9 +82,7 @@ export default function UpdatesPage() {
               <SectionBadge icon={Rss} label="Updates" tone="dark" />
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.05]">
                 Operational Milestones &amp;{" "}
-                <span className="bg-gradient-to-r from-emerald to-cyan-glow bg-clip-text text-transparent">
-                  Live Field Updates
-                </span>
+                <span className="text-emerald">Live Field Updates</span>
               </h1>
               <p className="text-white/60 text-base sm:text-lg leading-relaxed">
                 Real-time visibility into Kore Digital Limited&apos;s
@@ -193,8 +191,8 @@ function TimelineNode({ event }: { event: TimelineEvent }) {
         {event.video && (
           <div className="mt-4 space-y-2">
             {event.video.caption && (
-              <div className="flex items-center gap-2 text-slate-500 text-[11px]">
-                <PlayCircle className="w-3.5 h-3.5 text-emerald" />
+              <div className="flex items-center gap-2 text-slate-500 text-[10px]">
+                <PlayCircle className="w-3.5 h-3.5 text-emerald-ink" />
                 <span className="font-semibold text-slate-700">
                   {event.video.caption}
                 </span>
@@ -228,13 +226,13 @@ function TimelineNode({ event }: { event: TimelineEvent }) {
             <div className="flex items-start sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-slate-200 bg-mist">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 rounded-lg bg-emerald/10 border border-emerald/30 flex items-center justify-center shrink-0">
-                  <FileText className="w-4 h-4 text-emerald" />
+                  <FileText className="w-4 h-4 text-emerald-ink" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-slate-900 text-xs sm:text-sm font-semibold truncate">
                     {event.document.fileName}
                   </p>
-                  <p className="text-slate-500 text-[10px] sm:text-[11px] truncate">
+                  <p className="text-slate-500 text-[10px] truncate">
                     {event.document.label}
                     {event.document.reference && (
                       <>
@@ -279,7 +277,7 @@ function TimelineNode({ event }: { event: TimelineEvent }) {
               <a
                 href={event.document.src}
                 download={event.document.fileName}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 border border-slate-200 hover:border-emerald text-slate-700 hover:text-emerald font-semibold text-xs px-4 py-2.5 rounded transition"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 border border-slate-200 hover:border-emerald-ink text-slate-700 hover:text-emerald-ink font-semibold text-xs px-4 py-2.5 rounded transition"
               >
                 <Download className="w-3.5 h-3.5" /> Download PDF
               </a>

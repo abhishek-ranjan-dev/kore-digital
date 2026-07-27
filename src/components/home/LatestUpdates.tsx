@@ -21,7 +21,7 @@ export default function LatestUpdates() {
           />
           <Link
             href="/updates"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-900 hover:text-emerald transition-colors whitespace-nowrap"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-900 hover:text-emerald-ink transition-colors whitespace-nowrap"
           >
             View all updates
             <ArrowRight className="w-4 h-4" />
@@ -43,17 +43,17 @@ export default function LatestUpdates() {
                     {item.date}
                   </span>
                   <span className="w-1 h-1 rounded-full bg-slate-300" />
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-emerald">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-emerald-ink">
                     {item.category ?? "Update"}
                   </span>
                 </div>
-                <h3 className="text-lg md:text-xl font-semibold text-slate-900 leading-snug mb-3 group-hover:text-emerald transition-colors">
+                <h3 className="text-lg md:text-xl font-semibold text-slate-900 leading-snug mb-3 group-hover:text-emerald-ink transition-colors">
                   {item.title}
                 </h3>
                 <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">
                   {item.description}
                 </p>
-                <div className="mt-auto pt-6 flex items-center gap-1.5 text-sm font-semibold text-slate-900 group-hover:text-emerald transition-colors">
+                <div className="mt-auto pt-6 flex items-center gap-1.5 text-sm font-semibold text-slate-900 group-hover:text-emerald-ink transition-colors">
                   Read more
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </div>

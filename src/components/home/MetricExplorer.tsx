@@ -172,7 +172,7 @@ export default function MetricExplorer() {
                 href={active.annualReportUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900 hover:text-emerald transition-colors"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900 hover:text-emerald-ink transition-colors"
               >
                 Download {active.year} annual report
                 <ArrowUpRight className="w-4 h-4" />
@@ -180,7 +180,7 @@ export default function MetricExplorer() {
             ) : (
               <Link
                 href={active.annualReportUrl}
-                className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900 hover:text-emerald transition-colors"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900 hover:text-emerald-ink transition-colors"
               >
                 Download {active.year} annual report
                 <ArrowUpRight className="w-4 h-4" />
@@ -188,7 +188,7 @@ export default function MetricExplorer() {
             )}
             <Link
               href="/investor-relations"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900 hover:text-emerald transition-colors"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900 hover:text-emerald-ink transition-colors"
             >
               View full IR archive →
             </Link>

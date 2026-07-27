@@ -136,9 +136,7 @@ export default function AboutPage() {
 
             <h1 className="mount-fade-up text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.05] tracking-tight">
               Architecting India&apos;s{' '}
-              <span className="bg-gradient-to-r from-emerald to-cyan-glow bg-clip-text text-transparent">
-                Physical &amp; Digital
-              </span>{' '}
+              <span className="text-emerald">Physical &amp; Digital</span>{' '}
               Future
             </h1>
 
@@ -233,7 +231,7 @@ export default function AboutPage() {
                   <p className="text-white/50 text-[10px] uppercase tracking-[0.22em] font-medium">
                     {pillar.pillar}
                   </p>
-                  <span className="inline-flex items-center rounded-full border border-emerald/30 bg-emerald/10 px-3 py-1 text-[11px] font-semibold text-emerald tracking-wide">
+                  <span className="inline-flex items-center rounded-full border border-emerald/30 bg-emerald/10 px-3 py-1 text-[10px] font-semibold text-emerald tracking-wide">
                     {pillar.tag}
                   </span>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight leading-[1.1]">
@@ -278,9 +276,7 @@ export default function AboutPage() {
                 <Reveal delay={100}>
                   <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight leading-[1.1]">
                     Connectivity Backbone,{' '}
-                    <span className="bg-gradient-to-r from-emerald to-cyan-glow bg-clip-text text-transparent">
-                      Built on the Ground
-                    </span>
+                    <span className="text-emerald">Built on the Ground</span>
                   </h2>
                 </Reveal>
                 <Reveal delay={200}>
@@ -477,7 +473,7 @@ export default function AboutPage() {
               {/* ── Right: Extracted highlights ── */}
               <div className="space-y-4">
                 {/* Period tabs (visual only) */}
-                <div className="inline-flex items-center gap-1 bg-white/[0.03] border border-white/10 rounded-lg p-1 text-[11px] font-semibold">
+                <div className="inline-flex items-center gap-1 bg-white/[0.03] border border-white/10 rounded-lg p-1 text-[10px] font-semibold">
                   <span className="px-3 py-1.5 rounded-md bg-emerald/10 text-emerald border border-emerald/30">
                     FY25 Consolidated
                   </span>
@@ -522,9 +518,9 @@ export default function AboutPage() {
                         {stat.value}
                       </p>
                       <div className="flex items-center justify-between gap-2 mt-1.5">
-                        <p className="text-white/40 text-[11px]">{stat.prev}</p>
+                        <p className="text-white/40 text-[10px]">{stat.prev}</p>
                         {stat.margin && (
-                          <span className="text-white/50 text-[11px]">
+                          <span className="text-white/50 text-[10px]">
                             {stat.margin}
                           </span>
                         )}
