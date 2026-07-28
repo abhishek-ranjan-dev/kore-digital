@@ -71,7 +71,22 @@ export default function AIHubDeepDive() {
   const panel = PANELS[activeTab];
 
   return (
-    <section className="relative bg-obsidian-2 py-24 md:py-32 overflow-hidden">
+    <section className="relative bg-obsidian-2 py-24 md:py-32 overflow-hidden bg-[url('/images/ai-hub/gpu-server-rack.jpg')] bg-cover bg-center md:bg-fixed">
+      {/*
+        Real GPU-rack imagery as an atmospheric parallax backdrop, heavily
+        scrimmed with obsidian: it reads as context, not a live-facility claim
+        (the hall is a FY27 build — see the "Design targets" framing below).
+        Left-weighted gradient keeps the copy column crisp while the rack shows
+        through on the right.
+      */}
+      <div aria-hidden className="absolute inset-0 bg-obsidian-2/70" />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-r from-obsidian-2 via-obsidian-2/75 to-obsidian-2/25"
+      />
+      <div aria-hidden className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-obsidian-2 to-transparent" />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-obsidian-2 to-transparent" />
+
       <div
         aria-hidden
         className="absolute pointer-events-none blur-3xl rounded-full bg-cyan-glow"
@@ -84,7 +99,7 @@ export default function AIHubDeepDive() {
           opacity: 0.12,
         }}
       />
-      <div className="absolute inset-0 dot-grid-obsidian pointer-events-none" />
+      <div className="absolute inset-0 dot-grid-obsidian pointer-events-none opacity-40" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
