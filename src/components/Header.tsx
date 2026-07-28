@@ -3,14 +3,26 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, ChevronRight } from "lucide-react";
+import { Menu, X, ChevronRight, FileText } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { keyMetrics } from "@/data/financials";
 
 const navLinks = [
   { label: "About", href: "/about" },
   { label: "Updates", href: "/updates" },
   { label: "Investor Relations", href: "/investor-relations", highlight: true },
 ];
+
+/*
+  Header quick-link to the latest investor presentation — institutional
+  analysts look for the deck within seconds of landing. Single source of
+  truth: swap `href`/`label` to the H2 FY26 deck the moment that PDF is
+  uploaded (its disclosure exists but the file is not yet available).
+*/
+const LATEST_PRESENTATION = {
+  href: "/pdf-docs/investor-presentations/KDL-Q4-2025-1.pdf",
+  label: "Q4 FY25 Presentation",
+};
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -64,6 +76,26 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-3">
+            <a
+              href={LATEST_PRESENTATION.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${LATEST_PRESENTATION.label} — open PDF (NSE ${keyMetrics.ticker})`}
+              className="group/deck hidden lg:inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 hover:border-emerald/40 transition-colors"
+            >
+              <span
+                aria-hidden="true"
+                className="ticker-pulse bg-emerald w-1.5 h-1.5 rounded-full"
+              />
+              <span className="text-[10px] font-mono tracking-wide text-white/60">
+                NSE: {keyMetrics.ticker}
+              </span>
+              <span aria-hidden="true" className="w-px h-3 bg-white/10" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald group-hover/deck:brightness-110 transition">
+                <FileText className="w-3 h-3" />
+                {LATEST_PRESENTATION.label}
+              </span>
+            </a>
             <Link
               href="/contact"
               className="hidden md:inline-flex items-center gap-1.5 bg-emerald hover:brightness-110 text-obsidian font-bold text-sm px-4 py-2 rounded transition-all"
@@ -130,6 +162,27 @@ export default function Header() {
                   </Link>
                 </motion.div>
               ))}
+              <motion.div
+                variants={{
+                  open: { opacity: 1, y: 0 },
+                  closed: { opacity: 0, y: -6 },
+                }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
+                <a
+                  href={LATEST_PRESENTATION.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 py-2.5 px-3 rounded text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <FileText className="w-4 h-4 text-emerald" />
+                  {LATEST_PRESENTATION.label}
+                  <span className="ml-auto text-[10px] font-mono text-white/55">
+                    NSE: {keyMetrics.ticker}
+                  </span>
+                </a>
+              </motion.div>
               <motion.div
                 className="pt-3"
                 variants={{

@@ -5,124 +5,111 @@ import { Network } from "lucide-react";
 import SectionHeading from "@/components/ui/SectionHeading";
 import StatBlock from "@/components/ui/StatBlock";
 
-interface City {
+/*
+  Samruddhi Mahamarg fiber corridor — the flagship 701 km, 6-duct backbone
+  running along the Nagpur–Mumbai Expressway under a 15-year concession.
+  Rendered west→east (Mumbai coast, lower-left → Nagpur, upper-right) so the
+  geography reads correctly. Node descriptions are place facts, not fabricated
+  per-segment metrics; only the corridor total (701 km) is a sourced figure.
+*/
+interface CorridorNode {
   id: string;
   name: string;
   x: number;
   y: number;
-  km: string;
-  labelAbove?: boolean;
+  desc: string;
+  primary?: boolean;
+  labelBelow?: boolean;
 }
 
-const CITIES: City[] = [
-  { id: "delhi", name: "Delhi", x: 243, y: 145, km: "142 km ring" },
-  { id: "ahmedabad", name: "Ahmedabad", x: 155, y: 260, km: "88 km spur" },
-  { id: "mumbai", name: "Mumbai", x: 165, y: 335, km: "96 km metro", labelAbove: true },
-  { id: "pune", name: "Pune", x: 195, y: 355, km: "34 km loop" },
-  { id: "nagpur", name: "Nagpur", x: 255, y: 290, km: "118 km hub" },
-  { id: "kolkata", name: "Kolkata", x: 345, y: 275, km: "76 km leg" },
-  { id: "hyderabad", name: "Hyderabad", x: 255, y: 375, km: "64 km ring" },
-  { id: "bangalore", name: "Bangalore", x: 240, y: 445, km: "52 km loop", labelAbove: true },
-  { id: "chennai", name: "Chennai", x: 290, y: 445, km: "31 km spur", labelAbove: true },
+const NODES: CorridorNode[] = [
+  { id: "mumbai", name: "Mumbai", x: 58, y: 292, desc: "Financial capital · DC clusters", primary: true, labelBelow: true },
+  { id: "amne", name: "Amne Interchange", x: 118, y: 268, desc: "Mumbai-end gateway", primary: true, labelBelow: true },
+  { id: "nashik", name: "Nashik", x: 192, y: 232, desc: "Igatpuri ghat section" },
+  { id: "shirdi", name: "Shirdi", x: 272, y: 198, desc: "Mid-corridor hub", primary: true, labelBelow: true },
+  { id: "aurangabad", name: "Ch. Sambhajinagar", x: 342, y: 170, desc: "Marathwada node" },
+  { id: "amravati", name: "Amravati", x: 448, y: 120, desc: "Vidarbha node" },
+  { id: "nagpur", name: "Nagpur", x: 512, y: 84, desc: "Corridor origin · Vidarbha", primary: true },
 ];
 
-interface Route {
-  id: string;
-  d: string;
-  begin: string;
-}
+const ROUTE_D =
+  "M58,292 L118,268 L192,232 L272,198 L342,170 L448,120 L512,84";
 
-const ROUTES: Route[] = [
-  { id: "route-0", d: "M243,145 Q170,240 165,335", begin: "0s" },
-  { id: "route-1", d: "M243,145 Q200,200 155,260", begin: "0.5s" },
-  { id: "route-2", d: "M155,260 Q145,300 165,335", begin: "1s" },
-  { id: "route-3", d: "M165,335 Q180,345 195,355", begin: "1.5s" },
-  { id: "route-4", d: "M165,335 Q210,315 255,290", begin: "2s" },
-  { id: "route-5", d: "M255,290 Q300,275 345,275", begin: "2.5s" },
-  { id: "route-6", d: "M255,290 Q255,330 255,375", begin: "3s" },
-  { id: "route-7", d: "M255,375 Q250,410 240,445", begin: "3.5s" },
-  { id: "route-8", d: "M240,445 Q265,455 290,445", begin: "3.8s" },
-];
-
-/*
-  Hand-tuned India silhouette (clockwise from Kashmir tip):
-  Kashmir → Ladakh → Nepal border → Bhutan → Arunachal bulge → NE narrows →
-  Bangladesh concave → Kolkata coast → Odisha → Andhra → Tamil east →
-  Kanyakumari tip → Kerala west → Konkan → Mumbai coast → Gujarat SE →
-  Saurashtra + Kutch bulge → Rajasthan west → Punjab → J&K SW → back to tip.
-*/
-const INDIA_PATH =
-  "M245,40 L280,55 L315,105 L355,135 L385,140 L445,165 L450,180 L420,205 L390,225 L365,245 L355,275 L345,320 L335,385 L300,445 L250,540 L215,490 L185,420 L170,385 L155,340 L145,290 L105,260 L85,235 L110,210 L140,180 L170,130 L200,85 Z";
-
-function CityNode({
-  city,
-  hovered,
+function Node({
+  node,
+  active,
   onEnter,
   onLeave,
 }: {
-  city: City;
-  hovered: boolean;
+  node: CorridorNode;
+  active: boolean;
   onEnter: (id: string) => void;
   onLeave: () => void;
 }) {
-  const labelY = city.labelAbove ? city.y - 14 : city.y + 20;
-  const kmY = city.labelAbove ? city.y - 26 : city.y + 32;
+  const isPrimary = !!node.primary;
+  const coreR = isPrimary ? 6 : 4;
+  const nameY = node.labelBelow ? node.y + 22 : node.y - 15;
+  const descY = node.labelBelow ? node.y + 36 : node.y - 29;
 
   return (
     <g
       role="button"
       tabIndex={0}
-      aria-label={`${city.name}: ${city.km}`}
-      onMouseEnter={() => onEnter(city.id)}
+      aria-label={`${node.name}: ${node.desc}`}
+      onMouseEnter={() => onEnter(node.id)}
       onMouseLeave={onLeave}
-      onFocus={() => onEnter(city.id)}
+      onFocus={() => onEnter(node.id)}
       onBlur={onLeave}
-      onClick={() => onEnter(city.id)}
+      onClick={() => onEnter(node.id)}
       className="cursor-pointer focus:outline-none focus-visible:outline-none"
       style={{ pointerEvents: "all" }}
     >
-      {/* Invisible enlarged tap/hit target — the visible dot is small. */}
-      <circle cx={city.x} cy={city.y} r={14} fill="transparent" />
+      {/* Enlarged invisible tap/hit target */}
+      <circle cx={node.x} cy={node.y} r={15} fill="transparent" />
+      {/* Halo */}
       <circle
-        cx={city.x}
-        cy={city.y}
-        r={hovered ? 16 : 10}
+        cx={node.x}
+        cy={node.y}
+        r={active ? 15 : isPrimary ? 11 : 8}
         fill="#10B981"
-        opacity={hovered ? 0.22 : 0.15}
+        opacity={active ? 0.18 : 0.1}
         style={{ transition: "r 200ms ease, opacity 200ms ease" }}
       />
+      {/* Core */}
       <circle
-        cx={city.x}
-        cy={city.y}
-        r={6}
+        cx={node.x}
+        cy={node.y}
+        r={coreR}
         fill="#FFFFFF"
-        stroke={hovered ? "#047857" : "#10B981"}
-        strokeWidth={2}
+        stroke={active ? "#047857" : "#10B981"}
+        strokeWidth={isPrimary ? 2.5 : 2}
         style={{ transition: "stroke 200ms ease" }}
       />
-      <circle cx={city.x} cy={city.y} r={2} fill="#10B981" />
+      <circle cx={node.x} cy={node.y} r={isPrimary ? 2 : 1.5} fill="#10B981" />
+      {/* Name (always visible) */}
       <text
-        x={city.x}
-        y={labelY}
-        fontSize={10}
-        fill="#334155"
-        fontWeight={600}
+        x={node.x}
+        y={nameY}
+        fontSize={isPrimary ? 12 : 10}
+        fill={isPrimary ? "#0F172A" : "#475569"}
+        fontWeight={isPrimary ? 700 : 600}
         textAnchor="middle"
         style={{ pointerEvents: "none" }}
       >
-        {city.name}
+        {node.name}
       </text>
-      {hovered ? (
+      {/* Description (on hover / focus) */}
+      {active ? (
         <text
-          x={city.x}
-          y={kmY}
+          x={node.x}
+          y={descY}
           fontSize={10}
           fill="#047857"
           fontWeight={700}
           textAnchor="middle"
           style={{ pointerEvents: "none" }}
         >
-          {city.km}
+          {node.desc}
         </text>
       ) : null}
     </g>
@@ -130,7 +117,7 @@ function CityNode({
 }
 
 export default function FiberFootprint() {
-  const [hoveredCity, setHoveredCity] = useState<string | null>(null);
+  const [activeNode, setActiveNode] = useState<string | null>(null);
 
   return (
     <section className="relative bg-mist py-24 md:py-32 overflow-hidden">
@@ -198,115 +185,131 @@ export default function FiberFootprint() {
           </div>
 
           <div className="lg:col-span-7">
-            <svg
-              viewBox="0 0 500 560"
-              className="w-full max-w-[560px] mx-auto"
-              role="group"
-              aria-label="Kore Digital fiber footprint across India — focus a city to reveal its route length"
-            >
-              <defs>
-                <pattern
-                  id="fiber-dot-grid"
-                  x="0"
-                  y="0"
-                  width="12"
-                  height="12"
-                  patternUnits="userSpaceOnUse"
-                >
-                  <circle cx="1" cy="1" r="1" fill="#E2E8F0" />
-                </pattern>
-                <clipPath id="india-clip">
-                  <path d={INDIA_PATH} />
-                </clipPath>
-                {ROUTES.map((r) => (
-                  <path key={r.id} id={r.id} d={r.d} />
-                ))}
-              </defs>
+            <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-5 sm:p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_10px_30px_-16px_rgba(15,23,42,0.18)]">
+              {/* Corridor header */}
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <p className="text-slate-500 text-[10px] font-mono tracking-[0.28em] uppercase">
+                  Samruddhi Mahamarg · Flagship Corridor
+                </p>
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-mono tracking-wide text-emerald-ink">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald ticker-pulse" />
+                  Nagpur–Mumbai
+                </span>
+              </div>
 
-              <path
-                d={INDIA_PATH}
-                fill="#F1F5F9"
-                stroke="#CBD5E1"
-                strokeWidth={1}
-              />
-              <rect
-                x="0"
-                y="0"
-                width="500"
-                height="560"
-                fill="url(#fiber-dot-grid)"
-                clipPath="url(#india-clip)"
-                opacity={0.6}
-              />
+              <svg
+                viewBox="0 0 560 360"
+                className="w-full"
+                role="group"
+                aria-label="Samruddhi Mahamarg fiber corridor from Nagpur to Mumbai — focus a stop to reveal its role"
+              >
+                <defs>
+                  <linearGradient id="corridor-sea" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.12" />
+                    <stop offset="100%" stopColor="#22D3EE" stopOpacity="0" />
+                  </linearGradient>
+                  <filter id="corridor-glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3.5" />
+                  </filter>
+                  <path id="samruddhi-route" d={ROUTE_D} fill="none" />
+                </defs>
 
-              <g>
-                {ROUTES.map((r) => (
-                  <path
-                    key={`stroke-${r.id}`}
-                    d={r.d}
-                    stroke="#10B981"
-                    strokeOpacity={0.35}
-                    strokeWidth={1}
-                    fill="none"
+                {/* Coast / Arabian Sea to the west of Mumbai */}
+                <rect x="0" y="0" width="60" height="360" fill="url(#corridor-sea)" />
+                <path
+                  d="M50,0 C40,80 58,150 44,230 C36,300 52,330 46,360"
+                  fill="none"
+                  stroke="#CBD5E1"
+                  strokeWidth="1"
+                  strokeDasharray="2 4"
+                  opacity="0.7"
+                />
+
+                {/* Route under-glow */}
+                <use
+                  href="#samruddhi-route"
+                  stroke="#10B981"
+                  strokeOpacity="0.18"
+                  strokeWidth="7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  filter="url(#corridor-glow)"
+                />
+                {/* Route main line */}
+                <use
+                  href="#samruddhi-route"
+                  stroke="#10B981"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Duct hint — a fine parallel dashed overlay */}
+                <use
+                  href="#samruddhi-route"
+                  stroke="#FFFFFF"
+                  strokeWidth="0.75"
+                  strokeOpacity="0.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeDasharray="1 6"
+                />
+
+                {/* Traveling data pulses — decorative motion, hidden under reduced-motion */}
+                <g data-motion-decor>
+                  {[0, 2.5].map((begin) => (
+                    <circle key={begin} r={3.5} fill="#10B981" filter="url(#corridor-glow)">
+                      <animateMotion
+                        dur="5s"
+                        begin={`${begin}s`}
+                        repeatCount="indefinite"
+                        rotate="auto"
+                      >
+                        <mpath href="#samruddhi-route" />
+                      </animateMotion>
+                      <animate
+                        attributeName="opacity"
+                        values="0;1;1;0"
+                        keyTimes="0;0.12;0.88;1"
+                        dur="5s"
+                        begin={`${begin}s`}
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                  ))}
+                </g>
+
+                {/* Stops */}
+                {NODES.map((node) => (
+                  <Node
+                    key={node.id}
+                    node={node}
+                    active={activeNode === node.id}
+                    onEnter={setActiveNode}
+                    onLeave={() => setActiveNode(null)}
                   />
                 ))}
-              </g>
+              </svg>
 
-              <g data-motion-decor>
-                {ROUTES.map((r) => (
-                  <circle key={`pulse-${r.id}`} r={3} fill="#10B981">
-                    <animateMotion
-                      dur="4s"
-                      repeatCount="indefinite"
-                      begin={r.begin}
-                      rotate="auto"
-                    >
-                      <mpath href={`#${r.id}`} />
-                    </animateMotion>
-                    <animate
-                      attributeName="opacity"
-                      values="0;1;1;0"
-                      keyTimes="0;0.15;0.85;1"
-                      dur="4s"
-                      repeatCount="indefinite"
-                      begin={r.begin}
-                    />
-                  </circle>
-                ))}
-              </g>
-
-              <g>
-                {CITIES.map((city) => (
-                  <CityNode
-                    key={city.id}
-                    city={city}
-                    hovered={hoveredCity === city.id}
-                    onEnter={setHoveredCity}
-                    onLeave={() => setHoveredCity(null)}
-                  />
-                ))}
-              </g>
-            </svg>
-
-            <div className="flex items-center justify-center gap-6 mt-6 text-xs text-slate-500 font-medium tracking-wide">
-              <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald ticker-pulse" />
-                Live segment
-              </span>
-              <span className="flex items-center gap-1.5">
-                <svg width="14" height="4" aria-hidden="true">
-                  <line
-                    x1="0"
-                    y1="2"
-                    x2="14"
-                    y2="2"
-                    stroke="#10B981"
-                    strokeWidth="1"
-                    opacity="0.35"
-                  />
-                </svg>
-                Fiber route
-              </span>
+              {/* Corridor facts + legend */}
+              <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-slate-200">
+                <p className="text-[10px] sm:text-xs text-slate-600">
+                  <span className="font-bold text-slate-900 tabular-nums">701 km</span>
+                  <span className="mx-1.5 text-slate-300">·</span>
+                  15-year concession
+                  <span className="mx-1.5 text-slate-300">·</span>
+                  6-duct OFC backbone
+                </p>
+                <div className="flex items-center gap-4 text-[10px] text-slate-500">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald ticker-pulse" />
+                    Live segment
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="inline-block w-2 h-2 rounded-full border-2 border-emerald bg-white" />
+                    Interchange
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
