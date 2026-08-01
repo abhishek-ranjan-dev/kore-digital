@@ -154,7 +154,7 @@ export default function Footer() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="/images/logo/kore-logo-lockup-dark.svg"
+                      src="/images/logo/Kore_Digital_Logo_Dark_BG.svg"
                       alt=""
                       aria-hidden="true"
                       width={2619}
