@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
   */
   allowedDevOrigins: ["192.168.*.*", "10.*.*.*"],
   experimental: {
+    /*
+      Inline the (small, atomic Tailwind) CSS into <head> as <style> instead
+      of a render-blocking <link>. Removes the CSS request from the critical
+      path — improves FCP/LCP for first-time visitors (esp. slow mobile).
+      Production-only; not applied in `next dev`.
+    */
+    inlineCss: true,
     serverActions: {
       /*
         Default is 1 MB. Bumped to 25 MB so the /admin document ingestion

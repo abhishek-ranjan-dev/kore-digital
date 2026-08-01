@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Menu, X, ChevronRight, FileText } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { keyMetrics } from "@/data/financials";
@@ -36,12 +35,14 @@ export default function Header() {
             aria-label="Kore Digital Limited — Connect to infinity"
             className="flex items-center gap-3 group"
           >
-            <Image
-              src="/images/logo/kore-digital-logo.png"
-              alt="Kore Digital Limited"
-              width={480}
-              height={100}
-              priority
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/logo/kore-logo-lockup-dark.svg"
+              alt=""
+              aria-hidden="true"
+              width={2619}
+              height={485}
+              fetchPriority="high"
               className="h-8 sm:h-9 w-auto transition-transform group-hover:scale-[1.02]"
             />
             <span

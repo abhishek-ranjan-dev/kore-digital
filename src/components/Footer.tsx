@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { keyMetrics } from "@/data/financials";
 
@@ -153,11 +152,13 @@ export default function Footer() {
                     aria-label="Kore Digital Limited — home"
                     className="inline-flex w-fit group transition-transform hover:scale-[1.02]"
                   >
-                    <Image
-                      src="/images/logo/kore-digital-logo.png"
-                      alt="Kore Digital Limited"
-                      width={480}
-                      height={100}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/images/logo/kore-logo-lockup-dark.svg"
+                      alt=""
+                      aria-hidden="true"
+                      width={2619}
+                      height={485}
                       className="h-8 w-auto"
                     />
                   </Link>
@@ -209,9 +210,9 @@ export default function Footer() {
 
                 {NAV_COLUMNS.map((col) => (
                   <div key={col.title}>
-                    <h4 className="text-white/80 text-[10px] font-semibold tracking-widest uppercase mb-4">
+                    <h2 className="text-white/80 text-[10px] font-semibold tracking-widest uppercase mb-4">
                       {col.title}
-                    </h4>
+                    </h2>
                     <ul className="space-y-2.5">
                       {col.links.map((link) => (
                         <li key={link.label}>

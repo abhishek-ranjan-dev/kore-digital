@@ -301,7 +301,7 @@ body {
    scrolling under it doesn't bleed through. Blur still active for the
    frosted feel where the tint alone doesn't fully cover. */
 .glass-nav {
-  background-color: rgba(9, 13, 22, 0.78);
+  background-color: rgba(9, 13, 22, 0.95);
   border-color: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);

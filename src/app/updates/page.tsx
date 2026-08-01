@@ -180,9 +180,9 @@ function TimelineNode({ event }: { event: TimelineEvent }) {
           </span>
         </div>
 
-        <h3 className="text-lg md:text-xl font-semibold text-slate-900 leading-snug mb-2">
+        <h2 className="text-lg md:text-xl font-semibold text-slate-900 leading-snug mb-2">
           {event.title}
-        </h3>
+        </h2>
 
         <p className="text-sm text-slate-600 leading-relaxed">
           {event.description}
