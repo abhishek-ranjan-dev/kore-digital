@@ -120,7 +120,7 @@ components:
 
 **Creative North Star: "The Investment-Grade Ledger"**
 
-Kore Digital is an NSE-listed deep-tech infrastructure operator, and the site is built to be believed by institutions and regulators before it is admired. The system reads like a listed company's annual report elevated to a screen: an **obsidian story** that frames capability and ambition, interrupted by **mist ledgers** — clean, near-white sections where the audited numbers stand in the open and can be checked. The two surfaces alternate down every page, and that rhythm is the identity: dark for narrative, light for accountability.
+Kore Digital is an NSE-listed deep-tech infrastructure operator, and the site is built to be believed by institutions and regulators before it is admired. The system reads like a listed company's annual report elevated to a screen: an **obsidian story** that frames capability and ambition, interrupted by **mist ledgers** — clean, near-white sections where the audited numbers stand in the open and can be checked. The two surfaces alternate down every page, and that rhythm is the identity: dark for narrative, light for accountability. (One deliberate exception: the `/investor-relations` surface runs all-dark on a single continuous gradient wash — see The Alternation Rule.)
 
 Emerald is the only chromatic voice, and it is deployed as **confirmation** — the "live", "listed", "verified", "on-track" signal — never as decoration. Type is set in Geist with tight tracking and heavy weight for headlines, and Geist Mono in wide-tracked uppercase for the ledger kickers (`SOURCE · Q4 FY25 INVESTOR PRESENTATION`) that give the whole thing its filing-document precision. Depth is quiet: surfaces are flat at rest and lift only in response to intent. Nothing sparkles for its own sake; the credibility of a real, compliant operator *is* the aesthetic.
 
@@ -166,6 +166,8 @@ A near-monochrome system: two deep darks and one light, a slate text ramp, and e
 
 **The Alternation Rule.** Sections are either obsidian (story) or mist (ledger); they alternate, and every mist↔obsidian seam is a `border-y border-slate-200` hairline or a `to-obsidian` gradient fade. Never stack two mist sections flush without a seam.
 
+*Investor-relations exception.* The `/investor-relations` page runs **all-dark** and does not alternate. Every section is transparent over one continuous, viewport-fixed gradient wash on `<main>` — a soft emerald glow with a faint cyan companion over the obsidian base (both atmospheric light per the Cyan-Is-Light Rule), giving the whole page one seamless surface instead of dark/light bands. Light "ledger" treatments are swapped for their dark equivalents there: `bg-mist` → transparent-over-wash, ink/slate text → white-at-alpha, `emerald-ink` → `#10B981`, ledger-ambient shadows → `white/10` borders on `white/[0.02]` cards. Because there is no colour break to absorb doubled section padding, the IR page uses a uniform vertical rhythm (`py-14 md:py-16`; photo bands `py-16 md:py-20`; hero `py-20 md:py-28`) rather than the standard IR paddings. This override is scoped to the IR page only — home / about / updates still alternate.
+
 ## Typography
 
 **Display / Body Font:** Geist (with system-ui, sans-serif) — one family carries display, headline, title, and body.
@@ -189,7 +191,7 @@ A near-monochrome system: two deep darks and one light, a slate text ramp, and e
 
 A centered `max-w-7xl` column governs every page. Two container paddings coexist by lineage: home / about / updates use `px-4 sm:px-6 lg:px-8`; investor-relations uses the wider `px-6 md:px-12`. Match the surface you're extending rather than mixing them within a page.
 
-Vertical rhythm is generous and comes in two idioms: narrative/marketing sections breathe at `py-24 md:py-32`; the denser IR sections run `py-20 md:py-24` (taller policy/governance bands at `py-20 md:py-28`). Section headers stack as kicker → headline → optional subtitle, centered on marketing surfaces and left-aligned in IR panels.
+Vertical rhythm is generous and comes in two idioms: narrative/marketing sections breathe at `py-24 md:py-32`; the all-dark IR page runs a tighter uniform `py-14 md:py-16` (photo bands `py-16 md:py-20`, hero `py-20 md:py-28`) — tighter because, on one continuous surface, there is no colour break to absorb doubled section padding at each boundary. Section headers stack as kicker → headline → optional subtitle, centered on marketing surfaces and left-aligned in IR panels.
 
 Grids are Tailwind-native: stat/metric rows are `grid-cols-2 lg:grid-cols-4`; bento feature grids `grid-cols-1 md:grid-cols-2` with `min-h` floors; editorial splits use a 12-column grid (`lg:col-span-5` copy / `lg:col-span-7` visual). Global `scroll-padding-top: 64px` clears the fixed header for in-page anchors.
 
@@ -239,8 +241,9 @@ Soft-but-serious rounding, tiered by scale: **pills** are fully round (`rounded-
 - **Style:** fixed top bar on `.glass-nav` (high-alpha obsidian tint + backdrop-blur). Desktop links `text-white/70 → text-white`; the IR link is the emerald nav-pill; primary CTA at the right.
 - **Mobile:** an in-flow panel on a solid `bg-obsidian` (never translucent — content must not bleed through), expanding with a framer-motion height+opacity reveal and lightly staggered links; a hamburger/X toggle drives it.
 
-### Tabs (IR filings)
-- **Style:** underline tabs on a `border-b border-white/10` rail. Base `pb-5 -mb-px border-b-2 font-semibold`; active = `border-emerald text-white`, inactive = `border-transparent text-white/50 hover:text-white/80`. The active underline recolors in place (no sliding indicator) — keep it that way for the ledger's composure.
+### Tabs / Section rail (IR)
+- **Underline tabs (pattern retained, retired on IR):** underline tabs on a `border-b border-white/10` rail. Base `pb-5 -mb-px border-b-2 font-semibold`; active = `border-emerald text-white`, inactive = `border-transparent text-white/50 hover:text-white/80`. The active underline recolors in place (no sliding indicator) — keep it that way for the ledger's composure. The IR filings tab pair (Financial Performance / Exchange Disclosures) has been split into standalone sections; the pattern stays documented for reuse elsewhere.
+- **IR section rail (`IRSubNav`):** a sticky in-page rail under the fixed header — Geist Mono uppercase links, the active one in `emerald` with a 2px emerald underline that recolors in place, scroll-spied to the section in view. It sits on the same high-alpha obsidian glass as the nav.
 
 ### Signature — The Ledger Kicker + Metric Block
 The system's fingerprint: a Geist Mono uppercase kicker (`tracking-[0.32em]`) sitting above a heavy tabular metric. Metric numbers are `tabular-nums`, responsive (`text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem]`), in **solid** emerald or ink — with the unit ("Cr", "%") as a smaller muted sibling on a `flex items-baseline` row. This block is how audited figures are presented across IR and About.
@@ -251,7 +254,7 @@ Two restrained motion signatures: the `ticker-pulse` emerald dot (a 2.2s opacity
 ## Do's and Don'ts
 
 ### Do:
-- **Do** alternate obsidian narrative sections with mist ledger sections, and seam every transition with a `border-y border-slate-200` hairline or a `to-obsidian` gradient fade.
+- **Do** alternate obsidian narrative sections with mist ledger sections, and seam every transition with a `border-y border-slate-200` hairline or a `to-obsidian` gradient fade. *(Exception: the `/investor-relations` page runs all-dark on one continuous gradient wash — see The Alternation Rule.)*
 - **Do** reserve emerald for confirmation — actions, live/listed states, on-track chips, and at most one accent word per headline (The One Signal Rule).
 - **Do** announce every major section with a Geist Mono uppercase kicker at `~0.28–0.32em` tracking.
 - **Do** set metric figures in solid color, `tabular-nums`, with the unit as a smaller muted baseline-aligned sibling; keep them responsive so `Cr`/`%` never clip.
