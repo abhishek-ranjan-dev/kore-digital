@@ -19,9 +19,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/motion/Reveal";
 import SectionBadge from "@/components/ui/SectionBadge";
-import StatBlock from "@/components/ui/StatBlock";
-import BentoCard from "@/components/ui/BentoCard";
 import InvestorStockSection from "@/components/stock/InvestorStockSection";
+import IRSubNav from "@/components/ir/IRSubNav";
+import RevenueTrajectory from "@/components/ir/RevenueTrajectory";
 import {
   financials,
   keyMetrics,
@@ -74,26 +74,20 @@ function policiesInGroup(keywords: readonly string[]) {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   Tab manager — programmatic, template-string driven, useState-backed
-   ═══════════════════════════════════════════════════════════════════ */
-
-const TABS = [
-  { id: "financials", label: "Financial Performance" },
-  { id: "disclosures", label: "Exchange Disclosures" },
-] as const;
-
-type TabId = (typeof TABS)[number]["id"];
-
 /*
   Latest-cycle headline metrics — sourced verbatim from the Q4 FY25
   Investor Presentation (public/pdf-docs/investor-presentations/KDL-Q4-2025-1.pdf,
   slide 5). Do not alter without pointing at a newer authoritative PDF.
 */
-const HEADLINE_METRICS: { value: string; unit?: string; label: string }[] = [
-  { value: "₹327.82", unit: "Cr", label: "Total Income" },
-  { value: "₹47.55", unit: "Cr", label: "Operational EBITDA" },
-  { value: "₹31.70", unit: "Cr", label: "Profit After Tax (PAT)" },
+const HEADLINE_METRICS: {
+  value: string;
+  unit?: string;
+  label: string;
+  delta?: string;
+}[] = [
+  { value: "₹327.82", unit: "Cr", label: "Total Income", delta: "+212%" },
+  { value: "₹47.55", unit: "Cr", label: "Operational EBITDA", delta: "+178%" },
+  { value: "₹31.70", unit: "Cr", label: "Profit After Tax", delta: "+176%" },
   { value: "14.50", unit: "%", label: "EBITDA Margin" },
 ];
 
@@ -112,18 +106,28 @@ function formatFY(year: string) {
   return `FY 20${m[1]}–${m[2]}`;
 }
 
-
 /* ═══════════════════════════════════════════════════════════════════
    PAGE
    ═══════════════════════════════════════════════════════════════════ */
 
 export default function InvestorRelationsPage() {
-  const [activeTab, setActiveTab] = useState<TabId>("financials");
 
   return (
     <>
       <Header />
-      <main className="flex-1 pt-16 bg-obsidian text-white">
+      <main
+        className="flex-1 pt-16 text-white"
+        style={{
+          backgroundColor: "#090D16",
+          // One continuous, viewport-fixed wash so every section shares the
+          // same vibrant-but-plain backdrop — no per-section seams. Emerald +
+          // a faint cyan companion, both atmospheric light per DESIGN.md.
+          backgroundImage:
+            "radial-gradient(55rem 30rem at 50% 0%, rgba(16,185,129,0.10), transparent 62%), radial-gradient(46rem 40rem at 88% 26%, rgba(34,211,238,0.06), transparent 55%)",
+          backgroundAttachment: "fixed",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
 
         {/*
           ── Full-width parallax hero ────────────────────────────────
@@ -151,47 +155,68 @@ export default function InvestorRelationsPage() {
             className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-obsidian"
           />
 
-          <div className="relative max-w-7xl mx-auto px-6 md:px-12 py-16 md:py-24 min-h-[440px] sm:min-h-[520px] md:min-h-[620px] flex flex-col justify-between gap-16">
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 self-start">
-              <span className="ticker-pulse bg-emerald w-2 h-2 rounded-full" />
-              <span className="text-[10px] text-white/60 uppercase tracking-widest font-medium">
-                NSE Listed
-              </span>
-              <span className="text-white/20 text-xs">|</span>
-              <span className="text-xs text-emerald font-mono">
-                {keyMetrics.ticker}
-              </span>
-              <span className="text-white/20 text-xs">|</span>
-              <span className="text-xs text-white/60 font-mono">
-                {keyMetrics.isin}
-              </span>
-              <span className="text-white/20 text-xs">|</span>
-              <span className="text-[10px] text-white/50 uppercase tracking-widest font-medium">
-                SEBI LODR 2015
-              </span>
-            </div>
+          <div className="relative max-w-7xl mx-auto px-6 md:px-12 py-20 md:py-28 flex min-h-[380px] flex-col justify-center md:min-h-[480px]">
+            <div className="max-w-3xl space-y-7">
+              <div className="inline-flex flex-wrap items-center gap-x-3 gap-y-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5">
+                <span className="ticker-pulse bg-emerald w-2 h-2 rounded-full" />
+                <span className="text-[10px] text-white/60 uppercase tracking-[0.18em] font-medium">
+                  NSE Listed
+                </span>
+                <span className="text-white/20">·</span>
+                <span className="text-xs text-emerald font-mono">
+                  {keyMetrics.ticker}
+                </span>
+                <span className="text-white/20">·</span>
+                <span className="text-xs text-white/60 font-mono">
+                  {keyMetrics.isin}
+                </span>
+                <span className="text-white/20">·</span>
+                <span className="text-[10px] text-white/50 uppercase tracking-[0.18em] font-medium">
+                  SEBI LODR 2015
+                </span>
+              </div>
 
-            <div className="space-y-6">
               <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white tracking-tight leading-[0.95] drop-shadow-lg">
                 Investor
                 <br />
                 <span className="text-emerald">Relations</span>
               </h1>
+
               <p className="text-white/70 text-base md:text-lg leading-relaxed max-w-2xl">
                 Kore Digital Limited&apos;s complete compliance repository —
-                audited financial results, Regulation 30 stock-exchange
-                disclosures, annual reports, board composition, and every
-                statutory policy document filed under SEBI LODR Regulation
-                46.
+                audited results, Regulation 30 disclosures, annual reports,
+                board composition, and every statutory policy filed under SEBI
+                LODR Regulation 46.
               </p>
+
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <a
+                  href="#performance"
+                  className="inline-flex items-center gap-2 rounded-lg bg-emerald px-5 py-2.5 text-sm font-bold text-obsidian transition hover:brightness-110"
+                >
+                  View performance
+                  <ArrowUpRight className="w-4 h-4" />
+                </a>
+                <a
+                  href="#policies"
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-emerald hover:text-emerald"
+                >
+                  Statutory policies
+                </a>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ── Live market — TradingView symbol overview ── */}
-        <section className="bg-obsidian relative overflow-hidden">
+        <IRSubNav />
+
+        {/* ── Live market — real-time NSE share price ── */}
+        <section
+          id="market"
+          className="relative overflow-hidden scroll-mt-32"
+        >
           <div className="dot-grid-obsidian absolute inset-0 pointer-events-none opacity-20" aria-hidden="true" />
-          <div className="relative max-w-7xl mx-auto px-6 md:px-12 py-20 md:py-24">
+          <div className="relative max-w-7xl mx-auto px-6 md:px-12 py-14 md:py-16">
             <div className="flex flex-col gap-4 mb-10">
               <SectionBadge icon={LineChart} label="Live Market" tone="dark" />
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.05] max-w-3xl">
@@ -206,82 +231,153 @@ export default function InvestorRelationsPage() {
           </div>
         </section>
 
-        {/* ── Latest-cycle headline metrics — light mist section ── */}
-        <section className="bg-mist border-y border-slate-200">
-          <div className="max-w-7xl mx-auto px-6 md:px-12 py-20 md:py-24">
-            <div className="flex flex-col items-center text-center mb-14 gap-4">
-              <SectionBadge icon={TrendingUp} label="Latest Financial Cycle" tone="light" />
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
-                Consolidated Highlights
+        {/* ── Financial Performance — dark obsidian ledger ── */}
+        <section
+          id="performance"
+          className="relative overflow-hidden scroll-mt-32"
+        >
+          <div className="dot-grid-obsidian absolute inset-0 pointer-events-none opacity-20" aria-hidden="true" />
+          <div className="relative max-w-7xl mx-auto px-6 md:px-12 py-14 md:py-16">
+            <div className="flex flex-col gap-4 mb-12 md:mb-14">
+              <SectionBadge
+                icon={TrendingUp}
+                label="Financial Performance"
+                tone="dark"
+              />
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.05] max-w-3xl">
+                Audited results, and the growth behind them
               </h2>
-              <p className="text-slate-500 text-[10px] font-mono tracking-[0.32em] uppercase">
-                Source &nbsp;·&nbsp; Q4 FY25 Investor Presentation
+              <p className="text-white/70 text-base md:text-lg leading-relaxed max-w-2xl">
+                The latest consolidated cycle at a glance, and the standalone
+                revenue trajectory that precedes it — every figure sourced
+                verbatim from filed reports.
               </p>
             </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {HEADLINE_METRICS.map((m, i) => (
-                <Reveal key={m.label} delay={i * 80} className="h-full">
-                  <BentoCard tone="light" className="h-full min-h-[168px] justify-center">
-                    <StatBlock
-                      tone="light"
-                      size="lg"
-                      accent
-                      value={m.value}
-                      unit={m.unit}
-                      label={m.label}
-                    />
-                  </BentoCard>
-                </Reveal>
-              ))}
+            {/* ── Elevated FY25 scorecard: dominant lead + supporting trio ── */}
+            <div className="grid gap-4 sm:gap-6 lg:grid-cols-12">
+              <Reveal className="lg:col-span-5">
+                <div className="flex h-full flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.02] p-8">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-white/50 text-[10px] font-mono uppercase tracking-[0.28em]">
+                      {HEADLINE_METRICS[0].label}
+                    </p>
+                    {HEADLINE_METRICS[0].delta ? (
+                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald/10 px-2 py-1 text-xs font-bold tabular-nums text-emerald">
+                        <TrendingUp className="h-3 w-3" />
+                        {HEADLINE_METRICS[0].delta} YoY
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="mt-10">
+                    <p className="text-white text-[clamp(2.75rem,7vw,4rem)] font-bold leading-none tracking-tight tabular-nums">
+                      {HEADLINE_METRICS[0].value}
+                      <span className="text-white/50 text-2xl md:text-3xl font-medium ml-1.5">
+                        {HEADLINE_METRICS[0].unit}
+                      </span>
+                    </p>
+                    <p className="mt-3 text-white/50 text-sm">
+                      Consolidated · year ended 31 March 2025
+                    </p>
+                  </div>
+                </div>
+              </Reveal>
+
+              <Reveal delay={100} className="lg:col-span-7">
+                <div className="grid h-full grid-cols-1 divide-y divide-white/10 rounded-2xl border border-white/10 bg-white/[0.02] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                  {HEADLINE_METRICS.slice(1).map((m) => (
+                    <div
+                      key={m.label}
+                      className="flex flex-col justify-center gap-2.5 p-6 md:p-7"
+                    >
+                      <p className="text-white text-3xl md:text-4xl font-bold leading-none tracking-tight tabular-nums">
+                        {m.value}
+                        <span className="text-white/50 text-base md:text-lg font-medium ml-1">
+                          {m.unit}
+                        </span>
+                      </p>
+                      {m.delta ? (
+                        <span className="inline-flex w-fit items-center gap-1 text-xs font-bold tabular-nums text-emerald">
+                          <TrendingUp className="h-3 w-3" />
+                          {m.delta} YoY
+                        </span>
+                      ) : (
+                        <span className="text-white/40 text-xs">
+                          of total income
+                        </span>
+                      )}
+                      <p className="text-white/50 text-[10px] font-mono uppercase tracking-[0.2em]">
+                        {m.label}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </Reveal>
+            </div>
+
+            <p className="mt-5 text-white/50 text-[10px] font-mono uppercase tracking-[0.28em]">
+              Source · Q4 FY25 Investor Presentation
+            </p>
+
+            {/* ── Standalone revenue trajectory ── */}
+            <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-6 md:p-8">
+              <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+                <div className="lg:max-w-xs lg:shrink-0">
+                  <p className="text-white/50 text-[10px] font-mono uppercase tracking-[0.28em]">
+                    Revenue trajectory · Standalone
+                  </p>
+                  <p className="mt-3 text-white text-2xl font-bold tracking-tight leading-tight">
+                    ₹0.88 Cr → ₹103.51 Cr
+                  </p>
+                  <p className="mt-3 text-white/70 text-sm leading-relaxed">
+                    Audited standalone revenue, FY19-20 to FY23-24, as the owned
+                    fiber backbone came online. Net worth is plotted alongside
+                    (dashed).
+                  </p>
+                  <div className="mt-5 flex items-baseline gap-2 border-t border-white/10 pt-5">
+                    <span className="text-emerald text-4xl font-bold tabular-nums leading-none">
+                      ≈117×
+                    </span>
+                    <span className="text-white/50 text-xs">
+                      revenue, in four years
+                    </span>
+                  </div>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <RevenueTrajectory />
+                </div>
+              </div>
+              <p className="mt-4 border-t border-white/10 pt-4 text-white/50 text-[10px] font-mono uppercase tracking-[0.2em] leading-relaxed">
+                Figures in ₹ Cr · standalone · sourced verbatim from audited
+                annual reports · FY20-21 not shown (report not held)
+              </p>
+            </div>
+
+            {/* Historical progression table + annual reports */}
+            <div className="mt-16 md:mt-20">
+              <FinancialsView />
             </div>
           </div>
         </section>
 
-        {/* ── Filings & Financial Statements — dark obsidian section ── */}
-        <section className="bg-obsidian relative overflow-hidden">
+        {/* ── Exchange Disclosures — SEBI Regulation 30 ── */}
+        <section
+          id="disclosures"
+          className="relative overflow-hidden scroll-mt-32"
+        >
           <div className="dot-grid-obsidian absolute inset-0 pointer-events-none opacity-20" aria-hidden="true" />
-          <div className="relative max-w-7xl mx-auto px-6 md:px-12 py-20 md:py-24 space-y-14">
-            <div className="flex flex-col gap-4">
-              <SectionBadge icon={FileText} label="Filings · Financial Statements" tone="dark" />
+          <div className="relative max-w-7xl mx-auto px-6 md:px-12 py-14 md:py-16">
+            <div className="flex flex-col gap-4 mb-10">
+              <SectionBadge
+                icon={FileText}
+                label="Statutory Filings · SEBI Reg 30"
+                tone="dark"
+              />
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.05] max-w-3xl">
-                Financial performance & exchange disclosures
+                Exchange disclosures
               </h2>
             </div>
-
-            <div>
-              <div
-                role="tablist"
-                className="flex flex-wrap gap-x-10 md:gap-x-14 gap-y-2 border-b border-white/10"
-              >
-                {TABS.map((tab) => {
-                  const isActive = activeTab === tab.id;
-                  const buttonClass = [
-                    "pb-5 -mb-px border-b-2 text-sm md:text-base font-semibold tracking-tight transition-all",
-                    isActive
-                      ? "border-emerald text-white"
-                      : "border-transparent text-white/50 hover:text-white/80",
-                  ].join(" ");
-
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={buttonClass}
-                      aria-selected={isActive}
-                      role="tab"
-                    >
-                      {tab.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div role="tabpanel" className="relative min-h-[400px]">
-              {activeTab === "financials" && <FinancialsView />}
-              {activeTab === "disclosures" && <DisclosuresView />}
-            </div>
+            <DisclosuresView />
           </div>
         </section>
 
@@ -291,12 +387,16 @@ export default function InvestorRelationsPage() {
         {/* ── Corporate Governance — full-viewport photograph band, dark ── */}
         <GovernanceSection />
 
-        {/* ── Contact & Registered Agents — light mist section ── */}
-        <section className="bg-mist border-t border-slate-200">
-          <div className="max-w-7xl mx-auto px-6 md:px-12 py-20 md:py-24">
+        {/* ── Contact & Registered Agents — dark obsidian section ── */}
+        <section
+          id="contact"
+          className="relative overflow-hidden scroll-mt-32"
+        >
+          <div className="dot-grid-obsidian absolute inset-0 pointer-events-none opacity-20" aria-hidden="true" />
+          <div className="relative max-w-7xl mx-auto px-6 md:px-12 py-14 md:py-16">
             <div className="flex flex-col gap-4 mb-12">
-              <SectionBadge icon={Building2} label="Contact & Registered Agents" tone="light" />
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 tracking-tight leading-[1.05] max-w-3xl">
+              <SectionBadge icon={Building2} label="Contact & Registered Agents" tone="dark" />
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.05] max-w-3xl">
                 Reach the desks that handle your holdings
               </h2>
             </div>
@@ -421,20 +521,20 @@ function AgentCard({
 }: AgentCardProps) {
   const isExternal = action.external;
   return (
-    <div className="group relative h-full flex flex-col bg-white border border-slate-200 rounded-2xl p-6 md:p-8 bento-hover">
-      <div className="w-11 h-11 rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center mb-6 group-hover:border-emerald/60 group-hover:bg-emerald/10 transition-colors">
-        <Icon className="w-4 h-4 text-emerald-ink" />
+    <div className="group relative h-full flex flex-col bg-white/[0.02] border border-white/10 rounded-2xl p-6 md:p-8 transition-all duration-300 hover:border-emerald/50 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald/10">
+      <div className="w-11 h-11 rounded-lg border border-white/10 bg-white/[0.03] flex items-center justify-center mb-6 group-hover:border-emerald/60 group-hover:bg-emerald/10 transition-colors">
+        <Icon className="w-4 h-4 text-emerald" />
       </div>
 
-      <p className="text-slate-500 text-[10px] font-mono tracking-[0.25em] uppercase mb-3">
+      <p className="text-white/50 text-[10px] font-mono tracking-[0.25em] uppercase mb-3">
         {eyebrow}
       </p>
 
-      <p className="text-slate-900 text-lg font-semibold tracking-tight mb-4">
+      <p className="text-white text-lg font-semibold tracking-tight mb-4">
         {name}
       </p>
 
-      <p className="text-slate-600 text-sm leading-relaxed mb-6 flex-grow">
+      <p className="text-white/70 text-sm leading-relaxed mb-6 flex-grow">
         {address}
       </p>
 
@@ -443,7 +543,7 @@ function AgentCard({
         {...(isExternal
           ? { target: "_blank", rel: "noopener noreferrer" }
           : {})}
-        className="inline-flex items-center gap-1.5 text-sm text-slate-700 group-hover:text-emerald-ink transition-colors self-start w-full mt-auto pt-4 border-t border-slate-200 group-hover:border-emerald/40"
+        className="inline-flex items-center gap-1.5 text-sm text-white/70 group-hover:text-emerald transition-colors self-start w-full mt-auto pt-4 border-t border-white/10 group-hover:border-emerald/40"
       >
         <span>{action.label}</span>
         <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -806,20 +906,32 @@ function ReportDrawerContent({
 function DisclosuresView() {
   return (
     <div className="glass-obsidian rounded-2xl p-8 md:p-12">
-      <p className="text-emerald text-[10px] font-mono tracking-[0.25em] uppercase mb-6 inline-flex items-center gap-2">
-        <span className="ticker-pulse bg-emerald w-1.5 h-1.5 rounded-full" />
-        [ Pipeline Status: Active ]
-      </p>
+      <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+        <div className="max-w-xl">
+          <p className="inline-flex items-center gap-2 text-emerald text-[10px] font-mono uppercase tracking-[0.25em] mb-5">
+            <span className="ticker-pulse bg-emerald w-1.5 h-1.5 rounded-full" />
+            Regulation 30 · Filed live on NSE
+          </p>
 
-      <h3 className="text-white text-2xl md:text-3xl font-bold tracking-tight mb-4">
-        Exchange Disclosures Feed
-      </h3>
+          <p className="text-white/70 text-sm leading-relaxed">
+            Every material event is filed with the National Stock Exchange under
+            SEBI Regulation 30, where the authoritative, timestamped record
+            lives. The mirrored feed here fills in as each filing is published
+            to the compliance console — until then, the complete announcement
+            history is one click away on NSE.
+          </p>
+        </div>
 
-      <p className="text-white/70 text-sm leading-relaxed max-w-xl">
-        This chronological framework is ready to dynamically stream live
-        statutory communications filed with the National Stock Exchange under
-        SEBI Regulation 30 upon client document upload.
-      </p>
+        <a
+          href="https://www.nseindia.com/get-quotes/equity?symbol=KDL"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-emerald px-5 py-3 text-sm font-bold text-obsidian transition hover:brightness-110"
+        >
+          View filings on NSE
+          <ExternalLink className="w-4 h-4" />
+        </a>
+      </div>
     </div>
   );
 }
@@ -838,7 +950,8 @@ function GovernanceSection() {
 
   return (
     <section
-      className="relative overflow-hidden
+      id="governance"
+      className="relative overflow-hidden scroll-mt-32
                  bg-[url('/images/investor-relations/corporate_governance.jpg')]
                  bg-cover bg-center md:bg-fixed"
     >
@@ -852,10 +965,14 @@ function GovernanceSection() {
         aria-hidden="true"
         className="absolute -right-40 top-1/4 w-[520px] h-[520px] rounded-full bg-emerald/8 blur-3xl pointer-events-none"
       />
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-obsidian pointer-events-none"
+      />
 
       <div
         className="relative max-w-7xl mx-auto
-                   px-6 md:px-12 py-20 md:py-28
+                   px-6 md:px-12 py-16 md:py-20
                    space-y-12 md:space-y-16"
       >
 
@@ -880,7 +997,7 @@ function GovernanceSection() {
                 aria-hidden="true"
                 className="inline-block w-6 h-px bg-emerald/60"
               />
-              01 · Board Composition
+              Board Composition
             </p>
 
             <p className="text-white/50 text-[10px] font-mono tracking-[0.28em] uppercase mb-2.5">
@@ -923,7 +1040,7 @@ function GovernanceSection() {
                 aria-hidden="true"
                 className="inline-block w-6 h-px bg-emerald/60"
               />
-              02 · Statutory Committees
+              Statutory Committees
             </p>
 
             <p className="text-white/50 text-[10px] font-mono tracking-[0.28em] uppercase mb-2.5">
@@ -950,7 +1067,7 @@ function GovernanceSection() {
                 aria-hidden="true"
                 className="inline-block w-6 h-px bg-emerald/60"
               />
-              03 · Compliance Desk
+              Compliance Desk
             </p>
 
             <div className="flex items-start gap-3 mb-4">
@@ -1028,19 +1145,23 @@ function PoliciesSection() {
   );
 
   return (
-    <section className="bg-mist border-y border-slate-200">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-20 md:py-28 space-y-16 md:space-y-20">
+    <section
+      id="policies"
+      className="relative overflow-hidden scroll-mt-32"
+    >
+      <div className="dot-grid-obsidian absolute inset-0 pointer-events-none opacity-20" aria-hidden="true" />
+      <div className="relative max-w-7xl mx-auto px-6 md:px-12 py-14 md:py-16 space-y-16 md:space-y-20">
 
         <div className="flex flex-col gap-4">
           <SectionBadge
             icon={ShieldCheck}
             label={`Compliance Library · SEBI LODR Reg 46 · ${policyDocuments.length} documents`}
-            tone="light"
+            tone="dark"
           />
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-slate-900 tracking-tight leading-[0.95]">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight leading-[0.95]">
             Statutory Policies
           </h2>
-          <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-2xl">
+          <p className="text-white/70 text-base md:text-lg leading-relaxed max-w-2xl">
             The complete mandatory policy library — every document filed under
             SEBI LODR Regulation 46, organised by regulatory subject area for
             audit-friendly retrieval.
@@ -1053,7 +1174,7 @@ function PoliciesSection() {
             if (items.length === 0) return null;
             return (
               <div key={group.heading}>
-                <p className="text-emerald-ink text-[10px] font-mono tracking-[0.28em] uppercase mb-5 flex items-center gap-3">
+                <p className="text-emerald text-[10px] font-mono tracking-[0.28em] uppercase mb-5 flex items-center gap-3">
                   <span
                     aria-hidden="true"
                     className="inline-block w-6 h-px bg-emerald/60"
@@ -1070,17 +1191,17 @@ function PoliciesSection() {
                       <button
                         type="button"
                         onClick={() => setSelectedPolicy(policy)}
-                        className="text-left w-full group h-full flex flex-col bg-white border border-slate-200 rounded-2xl p-6 bento-hover cursor-pointer"
+                        className="text-left w-full group h-full flex flex-col bg-white/[0.03] border border-white/10 rounded-2xl p-6 hover:border-emerald/50 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald/10 transition-all duration-300 cursor-pointer"
                       >
-                        <div className="w-10 h-10 rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center mb-5 group-hover:border-emerald/50 group-hover:bg-emerald/10 transition-colors">
-                          <FileText className="w-4 h-4 text-emerald-ink" />
+                        <div className="w-10 h-10 rounded-lg border border-white/10 bg-white/[0.03] flex items-center justify-center mb-5 group-hover:border-emerald/50 group-hover:bg-emerald/10 transition-colors">
+                          <FileText className="w-4 h-4 text-emerald" />
                         </div>
 
-                        <p className="text-slate-900 text-sm md:text-base font-semibold tracking-tight leading-snug mb-6">
+                        <p className="text-white text-sm md:text-base font-semibold tracking-tight leading-snug mb-6">
                           {policy.title}
                         </p>
 
-                        <span className="mt-auto inline-flex items-center gap-1.5 text-xs text-slate-700 group-hover:text-emerald-ink transition-colors">
+                        <span className="mt-auto inline-flex items-center gap-1.5 text-xs text-white/70 group-hover:text-emerald transition-colors">
                           View Policy
                           <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                         </span>
