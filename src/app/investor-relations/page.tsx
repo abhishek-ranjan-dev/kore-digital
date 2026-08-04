@@ -13,6 +13,7 @@ import {
   Download,
   ExternalLink,
   Users,
+  LineChart,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -20,6 +21,7 @@ import Reveal from "@/components/motion/Reveal";
 import SectionBadge from "@/components/ui/SectionBadge";
 import StatBlock from "@/components/ui/StatBlock";
 import BentoCard from "@/components/ui/BentoCard";
+import InvestorStockSection from "@/components/stock/InvestorStockSection";
 import {
   financials,
   keyMetrics,
@@ -183,6 +185,24 @@ export default function InvestorRelationsPage() {
                 46.
               </p>
             </div>
+          </div>
+        </section>
+
+        {/* ── Live market — TradingView symbol overview ── */}
+        <section className="bg-obsidian relative overflow-hidden">
+          <div className="dot-grid-obsidian absolute inset-0 pointer-events-none opacity-20" aria-hidden="true" />
+          <div className="relative max-w-7xl mx-auto px-6 md:px-12 py-20 md:py-24">
+            <div className="flex flex-col gap-4 mb-10">
+              <SectionBadge icon={LineChart} label="Live Market" tone="dark" />
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.05] max-w-3xl">
+                Share price &amp; performance
+              </h2>
+              <p className="text-white/70 text-base md:text-lg leading-relaxed max-w-2xl">
+                Live NSE share price and one-year performance for Kore Digital
+                (NSE: KDL).
+              </p>
+            </div>
+            <InvestorStockSection />
           </div>
         </section>
 

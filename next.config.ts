@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
     Combine with `npm run dev:lan` (binds to 0.0.0.0).
   */
   allowedDevOrigins: ["192.168.*.*", "10.*.*.*"],
+  // Keep the Node-only market-data lib external (don't bundle it into the route).
+  serverExternalPackages: ["yahoo-finance2"],
   experimental: {
     /*
       Inline the (small, atomic Tailwind) CSS into <head> as <style> instead
