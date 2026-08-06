@@ -44,7 +44,7 @@ export const financials: FinancialYear[] = [
     longTermBorrowings: 0.00,
     workInProgress: 1.84,
     netWorth: 0.08,
-    annualReportUrl: "/documents/annual-reports/Annual-Report_2019-20.pdf",
+    annualReportUrl: "",
     isProjected: false,
   },
   {
@@ -54,7 +54,7 @@ export const financials: FinancialYear[] = [
     longTermBorrowings: 0.18,
     workInProgress: null,
     netWorth: 2.52,
-    annualReportUrl: "/documents/annual-reports/Annual-Report_2021-22.pdf",
+    annualReportUrl: "",
     isProjected: false,
   },
   {
@@ -64,7 +64,7 @@ export const financials: FinancialYear[] = [
     longTermBorrowings: 1.75,
     workInProgress: null,
     netWorth: 5.74,
-    annualReportUrl: "/documents/annual-reports/KDL_Annual-Report-2.0.pdf",
+    annualReportUrl: "",
     isProjected: false,
   },
   {
@@ -74,7 +74,7 @@ export const financials: FinancialYear[] = [
     longTermBorrowings: 0.11,
     workInProgress: 24.45,
     netWorth: 74.77,
-    annualReportUrl: "/documents/annual-reports/KDL_Annual-Report_2024.pdf",
+    annualReportUrl: "",
     isProjected: false,
   },
 ];

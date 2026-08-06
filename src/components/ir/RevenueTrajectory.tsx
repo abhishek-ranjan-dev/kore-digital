@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Bar,
   CartesianGrid,
@@ -12,14 +12,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { financials } from "@/data/financials";
+import type { FinancialYear } from "@/lib/financials-data";
 
 /*
-  Standalone revenue trajectory (FY19-20 → FY23-24), read straight from
-  the audited `financials` data. Revenue as emerald bars (the growth
-  "confirmation" signal); net worth as a slate reference line so the
-  balance-sheet build reads alongside the top line. Kept deliberately
-  separate from the consolidated FY25 headline figures — different basis.
+  Standalone revenue trajectory, built from the audited `financials` rows
+  passed in as a prop (Supabase-backed, or seed fallback). Revenue as emerald
+  bars (the growth "confirmation" signal); net worth as a slate reference line
+  so the balance-sheet build reads alongside the top line. Kept deliberately
+  separate from the consolidated headline figures — different basis.
 */
 type RevPoint = {
   year: string;
@@ -32,15 +32,6 @@ const shortFY = (year: string) => {
   const m = year.match(/FY(\d{2})-(\d{2})/);
   return m ? `FY${m[1]}` : year;
 };
-
-const DATA: RevPoint[] = financials
-  .filter((f) => f.revenue != null)
-  .map((f) => ({
-    year: shortFY(f.year),
-    revenue: f.revenue as number,
-    netWorth: f.netWorth,
-    growth: f.revenueGrowth,
-  }));
 
 function RevTooltip({
   active,
@@ -73,9 +64,26 @@ function RevTooltip({
   );
 }
 
-export default function RevenueTrajectory() {
+export default function RevenueTrajectory({
+  financials,
+}: {
+  financials: FinancialYear[];
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const [view, setView] = useState({ shown: false, animate: false });
+
+  const data: RevPoint[] = useMemo(
+    () =>
+      financials
+        .filter((f) => f.revenue != null)
+        .map((f) => ({
+          year: shortFY(f.year),
+          revenue: f.revenue as number,
+          netWorth: f.netWorth,
+          growth: f.revenueGrowth,
+        })),
+    [financials]
+  );
 
   // Mount the chart (and fire its one authored draw) when it scrolls into
   // view. Reduced-motion users still get the chart — just without the draw.
@@ -103,7 +111,7 @@ export default function RevenueTrajectory() {
       {view.shown ? (
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
-            data={DATA}
+            data={data}
             margin={{ top: 28, right: 8, bottom: 0, left: 0 }}
           >
             <defs>

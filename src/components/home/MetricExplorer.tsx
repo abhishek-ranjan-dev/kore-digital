@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -10,7 +10,7 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
-import { financials, type FinancialYear } from "@/data/financials";
+import { SEED_PAYLOAD, type FinancialYear } from "@/lib/financials-data";
 import SectionHeading from "@/components/ui/SectionHeading";
 import SectionBadge from "@/components/ui/SectionBadge";
 import StatBlock from "@/components/ui/StatBlock";
@@ -63,11 +63,46 @@ function buildMetrics(active: FinancialYear): MetricConfig[] {
 }
 
 export default function MetricExplorer() {
-  const [activeIdx, setActiveIdx] = useState<number>(financials.length - 1);
-  const active = financials[activeIdx];
+  // Seed renders instantly; Supabase data (via /api/financials) overrides it,
+  // mirroring the investor-relations page so both stay in sync.
+  const [financials, setFinancials] = useState<FinancialYear[]>(
+    SEED_PAYLOAD.financials
+  );
+  const [activeIdx, setActiveIdx] = useState<number>(
+    Math.max(0, SEED_PAYLOAD.financials.length - 1)
+  );
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/financials")
+      .then((r) => r.json())
+      .then((d) => {
+        if (alive && d && Array.isArray(d.financials) && d.financials.length) {
+          setFinancials(d.financials);
+          setActiveIdx(d.financials.length - 1); // default to the latest year
+        }
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const active = financials[activeIdx] ?? financials[financials.length - 1];
   const metrics = buildMetrics(active);
   const isPdf = active.annualReportUrl.toLowerCase().endsWith(".pdf");
-  const progressPct = (activeIdx / (financials.length - 1)) * 100;
+  const progressPct =
+    financials.length > 1 ? (activeIdx / (financials.length - 1)) * 100 : 0;
+
+  // Headline derived from the first/last standalone rows + the count on record.
+  const firstRev = financials[0]?.revenue ?? null;
+  const lastRev = financials[financials.length - 1]?.revenue ?? null;
+  const trajectoryTitle =
+    firstRev != null && lastRev != null
+      ? `From ₹${firstRev.toFixed(2)} Cr to ₹${lastRev.toFixed(
+          2
+        )} Cr across ${financials.length} fiscal years.`
+      : "Financial trajectory";
 
   return (
     <section className="relative bg-mist py-24 md:py-32 overflow-hidden">
@@ -77,7 +112,7 @@ export default function MetricExplorer() {
           align="left"
           badgeIcon={TrendingUp}
           badgeLabel="Financial trajectory"
-          title="From ₹0.88 Cr to ₹103 Cr in four fiscal years."
+          title={trajectoryTitle}
           subtitle="Scrub the timeline to see how revenue, net worth, and growth compounded as KDL scaled from a private-limited fibre contractor to an NSE-listed multi-sector infrastructure company."
           className="mb-14 md:mb-20"
         />

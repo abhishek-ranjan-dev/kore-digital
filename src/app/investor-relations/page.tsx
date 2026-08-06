@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import {
   TrendingUp,
   TrendingDown,
@@ -22,74 +23,18 @@ import SectionBadge from "@/components/ui/SectionBadge";
 import InvestorStockSection from "@/components/stock/InvestorStockSection";
 import IRSubNav from "@/components/ir/IRSubNav";
 import RevenueTrajectory from "@/components/ir/RevenueTrajectory";
+import { keyMetrics } from "@/data/financials";
 import {
-  financials,
-  keyMetrics,
+  SEED_PAYLOAD,
+  type FinancialsPayload,
   type FinancialYear,
-} from "@/data/financials";
+} from "@/lib/financials-data";
+import { boardMembers, committees } from "@/data/governance";
 import {
-  boardMembers,
-  committees,
-  policyDocuments,
-  type PolicyDocument,
-} from "@/data/governance";
-
-/* ─── Statutory policy taxonomy ─────────────────────────────────────
-   Groups the 10 mandatory policies into 3 audit-friendly buckets by
-   subject area. Matching is by case-insensitive title substring so
-   new policies can be added to governance.ts and slotted in by
-   choosing a title containing one of the keywords.
-*/
-const POLICY_GROUPS = [
-  {
-    heading: "Core Governance & Conduct",
-    keywords: [
-      "Code of Conduct for Senior Management",
-      "Code of Conduct for Independent Directors",
-      "Nomination & Remuneration",
-      "Related Party Transaction",
-    ],
-  },
-  {
-    heading: "Operations & Materiality",
-    keywords: [
-      "Vigil Mechanism",
-      "Whistle",
-      "Risk Management",
-      "Preservation of Documents",
-      "Prevention of Sexual Harassment",
-    ],
-  },
-  {
-    heading: "Securities Compliance",
-    keywords: ["Insider Trading", "Materiality of Events"],
-  },
-] as const;
-
-function policiesInGroup(keywords: readonly string[]) {
-  return policyDocuments.filter((p) =>
-    keywords.some((k) =>
-      p.title.toLowerCase().includes(k.toLowerCase())
-    )
-  );
-}
-
-/*
-  Latest-cycle headline metrics — sourced verbatim from the Q4 FY25
-  Investor Presentation (public/pdf-docs/investor-presentations/KDL-Q4-2025-1.pdf,
-  slide 5). Do not alter without pointing at a newer authoritative PDF.
-*/
-const HEADLINE_METRICS: {
-  value: string;
-  unit?: string;
-  label: string;
-  delta?: string;
-}[] = [
-  { value: "₹327.82", unit: "Cr", label: "Total Income", delta: "+212%" },
-  { value: "₹47.55", unit: "Cr", label: "Operational EBITDA", delta: "+178%" },
-  { value: "₹31.70", unit: "Cr", label: "Profit After Tax", delta: "+176%" },
-  { value: "14.50", unit: "%", label: "EBITDA Margin" },
-];
+  SEED_POLICIES_PAYLOAD,
+  type PoliciesPayload,
+  type PolicyItem,
+} from "@/lib/policies-data";
 
 /* ═══════════════════════════════════════════════════════════════════
    Formatting helpers
@@ -106,11 +51,117 @@ function formatFY(year: string) {
   return `FY 20${m[1]}–${m[2]}`;
 }
 
+/** "FY19-20" → 2019 (the April start year); null if unparseable. */
+function fyStartYear(year: string): number | null {
+  const m = year.match(/FY(\d{2})-(\d{2})/);
+  return m ? 2000 + Number(m[1]) : null;
+}
+
+/** 2019 → "FY19-20". */
+function shortFY(startYear: number): string {
+  const a = String(startYear % 100).padStart(2, "0");
+  const b = String((startYear + 1) % 100).padStart(2, "0");
+  return `FY${a}-${b}`;
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    PAGE
    ═══════════════════════════════════════════════════════════════════ */
 
 export default function InvestorRelationsPage() {
+  // Seed renders instantly (SSR + first paint); Supabase data overrides it
+  // once fetched, so a new /admin submission shows up on the next load.
+  const [payload, setPayload] = useState<FinancialsPayload>(SEED_PAYLOAD);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/financials")
+      .then((r) => r.json())
+      .then((d) => {
+        if (alive && d && Array.isArray(d.financials)) setPayload(d);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const financials = payload.financials;
+  const lc = payload.latestConsolidated;
+
+  // FY-headline scorecard, derived from the latest consolidated row.
+  const fmtDelta = (n: number | null | undefined) =>
+    n == null ? undefined : `${n >= 0 ? "+" : ""}${n.toFixed(0)}%`;
+  const headline: {
+    value: string;
+    unit?: string;
+    label: string;
+    delta?: string;
+  }[] = lc
+    ? [
+        {
+          value: `₹${lc.totalIncome.toFixed(2)}`,
+          unit: "Cr",
+          label: "Total Income",
+          delta: fmtDelta(lc.deltas.totalIncome),
+        },
+        {
+          value: `₹${lc.operationalEbitda.toFixed(2)}`,
+          unit: "Cr",
+          label: "Operational EBITDA",
+          delta: fmtDelta(lc.deltas.operationalEbitda),
+        },
+        {
+          value: `₹${lc.pat.toFixed(2)}`,
+          unit: "Cr",
+          label: "Profit After Tax",
+          delta: fmtDelta(lc.deltas.pat),
+        },
+        {
+          value: lc.ebitdaMargin != null ? lc.ebitdaMargin.toFixed(2) : "—",
+          unit: "%",
+          label: "EBITDA Margin",
+        },
+      ]
+    : [];
+
+  // Revenue-trajectory copy, derived from the first/last standalone rows.
+  const firstRev = financials[0]?.revenue ?? null;
+  const lastRev = financials[financials.length - 1]?.revenue ?? null;
+  const revMultiple =
+    firstRev && lastRev && firstRev > 0 ? Math.round(lastRev / firstRev) : null;
+  const revRangeLabel =
+    firstRev != null && lastRev != null
+      ? `₹${firstRev.toFixed(2)} Cr → ₹${lastRev.toFixed(2)} Cr`
+      : "";
+  const revYearsLabel =
+    financials.length > 0
+      ? `${formatFY(financials[0].year)} to ${formatFY(
+          financials[financials.length - 1].year
+        )}`
+      : "";
+
+  // Fiscal years absent from the standalone series (report not held) —
+  // derived from gaps between the earliest and latest year on record, so the
+  // caption stays accurate as the Supabase data set grows.
+  const presentStartYears = financials
+    .map((f) => fyStartYear(f.year))
+    .filter((y): y is number => y != null)
+    .sort((a, b) => a - b);
+  const missingYears: string[] = [];
+  if (presentStartYears.length > 1) {
+    const first = presentStartYears[0];
+    const last = presentStartYears[presentStartYears.length - 1];
+    for (let y = first + 1; y < last; y++) {
+      if (!presentStartYears.includes(y)) missingYears.push(shortFY(y));
+    }
+  }
+  const missingNote =
+    missingYears.length > 0
+      ? ` · ${missingYears.join(", ")} not shown (report${
+          missingYears.length > 1 ? "s" : ""
+        } not held)`
+      : "";
 
   return (
     <>
@@ -254,70 +305,74 @@ export default function InvestorRelationsPage() {
               </p>
             </div>
 
-            {/* ── Elevated FY25 scorecard: dominant lead + supporting trio ── */}
-            <div className="grid gap-4 sm:gap-6 lg:grid-cols-12">
-              <Reveal className="lg:col-span-5">
-                <div className="flex h-full flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.02] p-8">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-white/50 text-[10px] font-mono uppercase tracking-[0.28em]">
-                      {HEADLINE_METRICS[0].label}
-                    </p>
-                    {HEADLINE_METRICS[0].delta ? (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald/10 px-2 py-1 text-xs font-bold tabular-nums text-emerald">
-                        <TrendingUp className="h-3 w-3" />
-                        {HEADLINE_METRICS[0].delta} YoY
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="mt-10">
-                    <p className="text-white text-[clamp(2.75rem,7vw,4rem)] font-bold leading-none tracking-tight tabular-nums">
-                      {HEADLINE_METRICS[0].value}
-                      <span className="text-white/50 text-2xl md:text-3xl font-medium ml-1.5">
-                        {HEADLINE_METRICS[0].unit}
-                      </span>
-                    </p>
-                    <p className="mt-3 text-white/50 text-sm">
-                      Consolidated · year ended 31 March 2025
-                    </p>
-                  </div>
-                </div>
-              </Reveal>
-
-              <Reveal delay={100} className="lg:col-span-7">
-                <div className="grid h-full grid-cols-1 divide-y divide-white/10 rounded-2xl border border-white/10 bg-white/[0.02] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-                  {HEADLINE_METRICS.slice(1).map((m) => (
-                    <div
-                      key={m.label}
-                      className="flex flex-col justify-center gap-2.5 p-6 md:p-7"
-                    >
-                      <p className="text-white text-3xl md:text-4xl font-bold leading-none tracking-tight tabular-nums">
-                        {m.value}
-                        <span className="text-white/50 text-base md:text-lg font-medium ml-1">
-                          {m.unit}
-                        </span>
-                      </p>
-                      {m.delta ? (
-                        <span className="inline-flex w-fit items-center gap-1 text-xs font-bold tabular-nums text-emerald">
-                          <TrendingUp className="h-3 w-3" />
-                          {m.delta} YoY
-                        </span>
-                      ) : (
-                        <span className="text-white/40 text-xs">
-                          of total income
-                        </span>
-                      )}
-                      <p className="text-white/50 text-[10px] font-mono uppercase tracking-[0.2em]">
-                        {m.label}
-                      </p>
+            {/* ── Elevated headline scorecard: dominant lead + supporting trio ── */}
+            {lc && headline.length > 0 && (
+              <>
+                <div className="grid gap-4 sm:gap-6 lg:grid-cols-12">
+                  <Reveal className="lg:col-span-5">
+                    <div className="flex h-full flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.02] p-8">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-white/50 text-[10px] font-mono uppercase tracking-[0.28em]">
+                          {headline[0].label}
+                        </p>
+                        {headline[0].delta ? (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-emerald/10 px-2 py-1 text-xs font-bold tabular-nums text-emerald">
+                            <TrendingUp className="h-3 w-3" />
+                            {headline[0].delta} YoY
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="mt-10">
+                        <p className="text-white text-[clamp(2.75rem,7vw,4rem)] font-bold leading-none tracking-tight tabular-nums">
+                          {headline[0].value}
+                          <span className="text-white/50 text-2xl md:text-3xl font-medium ml-1.5">
+                            {headline[0].unit}
+                          </span>
+                        </p>
+                        <p className="mt-3 text-white/50 text-sm">
+                          Consolidated · {lc.yearEndedLabel}
+                        </p>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </Reveal>
-            </div>
+                  </Reveal>
 
-            <p className="mt-5 text-white/50 text-[10px] font-mono uppercase tracking-[0.28em]">
-              Source · Q4 FY25 Investor Presentation
-            </p>
+                  <Reveal delay={100} className="lg:col-span-7">
+                    <div className="grid h-full grid-cols-1 divide-y divide-white/10 rounded-2xl border border-white/10 bg-white/[0.02] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                      {headline.slice(1).map((m) => (
+                        <div
+                          key={m.label}
+                          className="flex flex-col justify-center gap-2.5 p-6 md:p-7"
+                        >
+                          <p className="text-white text-3xl md:text-4xl font-bold leading-none tracking-tight tabular-nums">
+                            {m.value}
+                            <span className="text-white/50 text-base md:text-lg font-medium ml-1">
+                              {m.unit}
+                            </span>
+                          </p>
+                          {m.delta ? (
+                            <span className="inline-flex w-fit items-center gap-1 text-xs font-bold tabular-nums text-emerald">
+                              <TrendingUp className="h-3 w-3" />
+                              {m.delta} YoY
+                            </span>
+                          ) : (
+                            <span className="text-white/40 text-xs">
+                              of total income
+                            </span>
+                          )}
+                          <p className="text-white/50 text-[10px] font-mono uppercase tracking-[0.2em]">
+                            {m.label}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </Reveal>
+                </div>
+
+                <p className="mt-5 text-white/50 text-[10px] font-mono uppercase tracking-[0.28em]">
+                  Source · {lc.fiscalYear} audited consolidated results
+                </p>
+              </>
+            )}
 
             {/* ── Standalone revenue trajectory ── */}
             <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-6 md:p-8">
@@ -327,35 +382,36 @@ export default function InvestorRelationsPage() {
                     Revenue trajectory · Standalone
                   </p>
                   <p className="mt-3 text-white text-2xl font-bold tracking-tight leading-tight">
-                    ₹0.88 Cr → ₹103.51 Cr
+                    {revRangeLabel}
                   </p>
                   <p className="mt-3 text-white/70 text-sm leading-relaxed">
-                    Audited standalone revenue, FY19-20 to FY23-24, as the owned
-                    fiber backbone came online. Net worth is plotted alongside
-                    (dashed).
+                    Audited standalone revenue over {revYearsLabel}. Net worth
+                    is plotted alongside (dashed).
                   </p>
-                  <div className="mt-5 flex items-baseline gap-2 border-t border-white/10 pt-5">
-                    <span className="text-emerald text-4xl font-bold tabular-nums leading-none">
-                      ≈117×
-                    </span>
-                    <span className="text-white/50 text-xs">
-                      revenue, in four years
-                    </span>
-                  </div>
+                  {revMultiple != null && (
+                    <div className="mt-5 flex items-baseline gap-2 border-t border-white/10 pt-5">
+                      <span className="text-emerald text-4xl font-bold tabular-nums leading-none">
+                        ≈{revMultiple}×
+                      </span>
+                      <span className="text-white/50 text-xs">
+                        revenue growth
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <RevenueTrajectory />
+                  <RevenueTrajectory financials={financials} />
                 </div>
               </div>
               <p className="mt-4 border-t border-white/10 pt-4 text-white/50 text-[10px] font-mono uppercase tracking-[0.2em] leading-relaxed">
                 Figures in ₹ Cr · standalone · sourced verbatim from audited
-                annual reports · FY20-21 not shown (report not held)
+                annual reports{missingNote}
               </p>
             </div>
 
             {/* Historical progression table + annual reports */}
             <div className="mt-16 md:mt-20">
-              <FinancialsView />
+              <FinancialsView financials={financials} />
             </div>
           </div>
         </section>
@@ -553,11 +609,12 @@ function AgentCard({
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   TAB VIEW 1 — Financial Performance
-   Shows the scaling transition FY19-20 → FY24-25.
+   Financial Performance — historical table + annual-report grid
+   Data (standalone rows) is passed in from the page's Supabase-backed
+   payload (seed fallback), so submitting a report updates it live.
    ═══════════════════════════════════════════════════════════════════ */
 
-function FinancialsView() {
+function FinancialsView({ financials }: { financials: FinancialYear[] }) {
   const historical = [...financials].reverse();
   const reportsWithUrl = [...financials]
     .reverse()
@@ -695,6 +752,23 @@ function FinancialsView() {
    scroll locked while open.
    ═══════════════════════════════════════════════════════════════════ */
 
+/*
+  Portals drawer chrome to document.body so `position: fixed` resolves against
+  the viewport, not an ancestor that establishes a containing block. SSR-safe:
+  renders nothing on the server / first hydration, then portals after mount
+  (these drawers are always mounted for their slide animation).
+*/
+const drawerSubscribe = () => () => {};
+function DrawerPortal({ children }: { children: React.ReactNode }) {
+  const mounted = useSyncExternalStore(
+    drawerSubscribe,
+    () => true,
+    () => false
+  );
+  if (!mounted) return null;
+  return createPortal(children, document.body);
+}
+
 function ReportDrawer({
   report,
   onClose,
@@ -719,7 +793,7 @@ function ReportDrawer({
   const isOpen = report !== null;
 
   return (
-    <>
+    <DrawerPortal>
       <div
         onClick={onClose}
         aria-hidden="true"
@@ -740,7 +814,7 @@ function ReportDrawer({
       >
         {report && <ReportDrawerContent report={report} onClose={onClose} />}
       </aside>
-    </>
+    </DrawerPortal>
   );
 }
 
@@ -1140,9 +1214,24 @@ function GovernanceSection() {
    ═══════════════════════════════════════════════════════════════════ */
 
 function PoliciesSection() {
-  const [selectedPolicy, setSelectedPolicy] = useState<PolicyDocument | null>(
-    null
-  );
+  const [selectedPolicy, setSelectedPolicy] = useState<PolicyItem | null>(null);
+
+  // Seed renders instantly (SSR + first paint); Supabase data overrides it
+  // once fetched, so a new /admin submission shows up on the next load.
+  const [payload, setPayload] = useState<PoliciesPayload>(SEED_POLICIES_PAYLOAD);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/policies")
+      .then((r) => r.json())
+      .then((d) => {
+        if (alive && d && Array.isArray(d.groups)) setPayload(d);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   return (
     <section
@@ -1155,7 +1244,7 @@ function PoliciesSection() {
         <div className="flex flex-col gap-4">
           <SectionBadge
             icon={ShieldCheck}
-            label={`Compliance Library · SEBI LODR Reg 46 · ${policyDocuments.length} documents`}
+            label={`Compliance Library · SEBI LODR Reg 46 · ${payload.count} documents`}
             tone="dark"
           />
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight leading-[0.95]">
@@ -1169,22 +1258,21 @@ function PoliciesSection() {
         </div>
 
         <div className="space-y-12 md:space-y-14">
-          {POLICY_GROUPS.map((group) => {
-            const items = policiesInGroup(group.keywords);
-            if (items.length === 0) return null;
+          {payload.groups.map((group) => {
+            if (group.policies.length === 0) return null;
             return (
-              <div key={group.heading}>
+              <div key={group.category}>
                 <p className="text-emerald text-[10px] font-mono tracking-[0.28em] uppercase mb-5 flex items-center gap-3">
                   <span
                     aria-hidden="true"
                     className="inline-block w-6 h-px bg-emerald/60"
                   />
-                  {group.heading}
+                  {group.category}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
-                  {items.map((policy, i) => (
+                  {group.policies.map((policy, i) => (
                     <Reveal
-                      key={policy.title}
+                      key={`${policy.title}-${policy.fileUrl}`}
                       delay={i * 60}
                       className="h-full"
                     >
@@ -1231,7 +1319,7 @@ function PolicyDrawer({
   policy,
   onClose,
 }: {
-  policy: PolicyDocument | null;
+  policy: PolicyItem | null;
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -1251,7 +1339,7 @@ function PolicyDrawer({
   const isOpen = policy !== null;
 
   return (
-    <>
+    <DrawerPortal>
       <div
         onClick={onClose}
         aria-hidden="true"
@@ -1270,7 +1358,7 @@ function PolicyDrawer({
       >
         {policy && <PolicyDrawerContent policy={policy} onClose={onClose} />}
       </aside>
-    </>
+    </DrawerPortal>
   );
 }
 
@@ -1278,7 +1366,7 @@ function PolicyDrawerContent({
   policy,
   onClose,
 }: {
-  policy: PolicyDocument;
+  policy: PolicyItem;
   onClose: () => void;
 }) {
   const filename = policy.fileUrl.split("/").pop() ?? "policy.pdf";
@@ -1294,9 +1382,11 @@ function PolicyDrawerContent({
             <p className="text-white text-sm font-semibold leading-snug">
               {policy.title}
             </p>
-            <p className="text-white/60 text-[10px] font-mono tracking-[0.25em] uppercase mt-1">
-              {policy.mandatoryUnder}
-            </p>
+            {policy.mandatoryUnder ? (
+              <p className="text-white/60 text-[10px] font-mono tracking-[0.25em] uppercase mt-1">
+                {policy.mandatoryUnder}
+              </p>
+            ) : null}
           </div>
         </div>
         <button

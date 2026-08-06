@@ -7,8 +7,10 @@ const nextConfig: NextConfig = {
     Combine with `npm run dev:lan` (binds to 0.0.0.0).
   */
   allowedDevOrigins: ["192.168.*.*", "10.*.*.*"],
-  // Keep the Node-only market-data lib external (don't bundle it into the route).
-  serverExternalPackages: ["yahoo-finance2"],
+  // Keep Node-only libs external (don't bundle them into the server bundle):
+  // the market-data lib, and the PDF tools used by /admin AI auto-extract
+  // (pdf.js-based; they can break when bundled).
+  serverExternalPackages: ["yahoo-finance2", "unpdf", "pdf-lib", "@google/genai"],
   experimental: {
     /*
       Inline the (small, atomic Tailwind) CSS into <head> as <style> instead
