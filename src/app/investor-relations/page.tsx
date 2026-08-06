@@ -797,7 +797,7 @@ function ReportDrawer({
       <div
         onClick={onClose}
         aria-hidden="true"
-        className={`fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       />
@@ -808,7 +808,7 @@ function ReportDrawer({
         aria-label={
           report ? `Annual Report ${formatFY(report.year)}` : "Report drawer"
         }
-        className={`fixed right-0 top-0 h-full w-full sm:max-w-[560px] lg:max-w-[920px] z-50 bg-obsidian border-l border-white/10 shadow-2xl shadow-black/70 transition-transform duration-300 ease-out ${
+        className={`fixed right-0 top-0 h-full w-full sm:max-w-[560px] lg:max-w-[920px] z-[70] bg-obsidian border-l border-white/10 shadow-2xl shadow-black/70 transition-transform duration-300 ease-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -1343,7 +1343,7 @@ function PolicyDrawer({
       <div
         onClick={onClose}
         aria-hidden="true"
-        className={`fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       />
@@ -1352,7 +1352,7 @@ function PolicyDrawer({
         role="dialog"
         aria-modal="true"
         aria-label={policy ? policy.title : "Policy drawer"}
-        className={`fixed right-0 top-0 h-full w-full sm:max-w-[560px] lg:max-w-[920px] z-50 bg-obsidian border-l border-white/10 shadow-2xl shadow-black/70 transition-transform duration-300 ease-out ${
+        className={`fixed right-0 top-0 h-full w-full sm:max-w-[560px] lg:max-w-[920px] z-[70] bg-obsidian border-l border-white/10 shadow-2xl shadow-black/70 transition-transform duration-300 ease-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >

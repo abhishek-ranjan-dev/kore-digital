@@ -11,6 +11,18 @@ const nextConfig: NextConfig = {
   // the market-data lib, and the PDF tools used by /admin AI auto-extract
   // (pdf.js-based; they can break when bundled).
   serverExternalPackages: ["yahoo-finance2", "unpdf", "pdf-lib", "@google/genai"],
+  /*
+    Reinforce the /admin exclusion at the HTTP layer. X-Robots-Tag applies even
+    when a crawler skips the <meta> tag / robots.txt, and `noai`/`noimageai`
+    signal AI/AEO crawlers to leave the admin console out entirely.
+  */
+  async headers() {
+    const value = "noindex, nofollow, noarchive, noai, noimageai";
+    return [
+      { source: "/admin", headers: [{ key: "X-Robots-Tag", value }] },
+      { source: "/admin/:path*", headers: [{ key: "X-Robots-Tag", value }] },
+    ];
+  },
   experimental: {
     /*
       Inline the (small, atomic Tailwind) CSS into <head> as <style> instead
@@ -19,6 +31,9 @@ const nextConfig: NextConfig = {
       Production-only; not applied in `next dev`.
     */
     inlineCss: true,
+    // Tree-shake barrel imports from heavy UI libs so only the used bits ship
+    // (smaller JS → less parse/eval → lower Total Blocking Time).
+    optimizePackageImports: ["framer-motion", "recharts", "lucide-react"],
     serverActions: {
       /*
         Default is 1 MB. Bumped to 25 MB so the /admin document ingestion
