@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, X, ChevronRight, FileText } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
 import { keyMetrics } from "@/data/financials";
 
 const navLinks = [
@@ -107,6 +106,8 @@ export default function Header() {
               className="md:hidden text-white/70 hover:text-white p-1"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Toggle navigation menu"
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
             >
               {mobileOpen ? (
                 <X className="w-6 h-6" />
@@ -118,92 +119,95 @@ export default function Header() {
         </div>
       </div>
 
-      <AnimatePresence initial={false}>
-        {mobileOpen && (
-          <motion.div
-            key="mobile-menu"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{
-              height: { duration: 0.32, ease: [0.4, 0, 0.2, 1] },
-              opacity: { duration: 0.22, ease: "easeOut" },
-            }}
-            className="md:hidden overflow-hidden border-t border-white/10 bg-obsidian"
-          >
-            <motion.nav
-              className="px-4 py-4 space-y-1"
-              initial="closed"
-              animate="open"
-              exit="closed"
-              variants={{
-                open: { transition: { staggerChildren: 0.05, delayChildren: 0.06 } },
-                closed: {},
-              }}
-            >
-              {navLinks.map((link) => (
-                <motion.div
-                  key={link.href}
-                  variants={{
-                    open: { opacity: 1, y: 0 },
-                    closed: { opacity: 0, y: -6 },
-                  }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
-                >
-                  <Link
-                    href={link.href}
-                    className={`block py-2.5 px-3 rounded text-sm transition-colors ${
-                      link.highlight
-                        ? "text-emerald font-semibold hover:bg-emerald/10"
-                        : "text-white/70 hover:text-white hover:bg-white/5"
-                    }`}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
-                </motion.div>
-              ))}
-              <motion.div
-                variants={{
-                  open: { opacity: 1, y: 0 },
-                  closed: { opacity: 0, y: -6 },
-                }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-              >
-                <a
-                  href={LATEST_PRESENTATION.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 py-2.5 px-3 rounded text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <FileText className="w-4 h-4 text-emerald" />
-                  {LATEST_PRESENTATION.label}
-                  <span className="ml-auto text-[10px] font-mono text-white/55">
-                    NSE: {keyMetrics.ticker}
-                  </span>
-                </a>
-              </motion.div>
-              <motion.div
-                className="pt-3"
-                variants={{
-                  open: { opacity: 1, y: 0 },
-                  closed: { opacity: 0, y: -6 },
-                }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-              >
+      {/*
+        Mobile menu — pure CSS animation (no framer-motion, which kept this
+        above-the-fold component off the critical path and improves mobile LCP).
+        The grid-rows 0fr→1fr trick animates height:auto smoothly; the inner
+        wrapper is overflow-hidden. Items fade+slide in with a staggered
+        transition-delay. Closed state is opacity-0 + pointer-events-none +
+        aria-hidden so it's inert and invisible (no stray border line).
+      */}
+      <div
+        id="mobile-menu"
+        aria-hidden={!mobileOpen}
+        className={`md:hidden grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          mobileOpen
+            ? "grid-rows-[1fr] opacity-100"
+            : "grid-rows-[0fr] opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="overflow-hidden border-t border-white/10 bg-obsidian">
+          <nav className="px-4 py-4 space-y-1">
+            {navLinks.map((link, i) => (
+              <MenuItem key={link.href} open={mobileOpen} index={i}>
                 <Link
-                  href="/contact"
-                  className="block bg-emerald hover:brightness-110 text-obsidian font-bold text-sm px-4 py-3 rounded text-center transition-all"
+                  href={link.href}
+                  className={`block py-2.5 px-3 rounded text-sm transition-colors ${
+                    link.highlight
+                      ? "text-emerald font-semibold hover:bg-emerald/10"
+                      : "text-white/70 hover:text-white hover:bg-white/5"
+                  }`}
                   onClick={() => setMobileOpen(false)}
                 >
-                  Get in Touch
+                  {link.label}
                 </Link>
-              </motion.div>
-            </motion.nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              </MenuItem>
+            ))}
+            <MenuItem open={mobileOpen} index={navLinks.length}>
+              <a
+                href={LATEST_PRESENTATION.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 py-2.5 px-3 rounded text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors"
+                onClick={() => setMobileOpen(false)}
+              >
+                <FileText className="w-4 h-4 text-emerald" />
+                {LATEST_PRESENTATION.label}
+                <span className="ml-auto text-[10px] font-mono text-white/55">
+                  NSE: {keyMetrics.ticker}
+                </span>
+              </a>
+            </MenuItem>
+            <MenuItem open={mobileOpen} index={navLinks.length + 1} className="pt-3">
+              <Link
+                href="/contact"
+                className="block bg-emerald hover:brightness-110 text-obsidian font-bold text-sm px-4 py-3 rounded text-center transition-all"
+                onClick={() => setMobileOpen(false)}
+              >
+                Get in Touch
+              </Link>
+            </MenuItem>
+          </nav>
+        </div>
+      </div>
     </header>
+  );
+}
+
+/*
+  A single mobile-menu row. Fades + slides in when the menu opens, with a
+  staggered transition-delay by index (approximating the old framer stagger).
+  On close it resets instantly (no delay) so the container collapse reads clean.
+*/
+function MenuItem({
+  open,
+  index,
+  className,
+  children,
+}: {
+  open: boolean;
+  index: number;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`transition-[opacity,transform] duration-200 ease-out ${
+        open ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"
+      } ${className ?? ""}`}
+      style={{ transitionDelay: open ? `${index * 50 + 60}ms` : "0ms" }}
+    >
+      {children}
+    </div>
   );
 }

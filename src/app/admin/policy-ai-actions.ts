@@ -1,6 +1,7 @@
 "use server";
 
 import { GoogleGenAI, Type } from "@google/genai";
+import { requireAdmin } from "@/lib/supabase/require-admin";
 
 /*
   ── Gemini auto-extract for statutory policies ──────────────────────────
@@ -70,6 +71,7 @@ function buildPrompt(categories: string[]): string {
 export async function parsePolicyPdf(
   formData: FormData
 ): Promise<ParsePolicyResult> {
+  await requireAdmin();
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return { ok: false, message: "AI extraction is not configured." };

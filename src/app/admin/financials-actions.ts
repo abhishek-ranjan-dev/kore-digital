@@ -6,6 +6,7 @@ import {
   getSupabaseAdmin,
   isSupabaseAdminConfigured,
 } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/supabase/require-admin";
 
 /*
   Annual-report submission — Server Action.
@@ -80,6 +81,7 @@ function fiscalYearEndFromLabel(fy: string): string | null {
 export async function submitAnnualReport(
   formData: FormData
 ): Promise<SubmitResult> {
+  await requireAdmin();
   if (!isSupabaseAdminConfigured) {
     return {
       ok: false,
@@ -247,6 +249,7 @@ export async function listAnnualReports(): Promise<AnnualReportRow[]> {
 export async function updateAnnualReport(
   input: UpdateReportInput
 ): Promise<SubmitResult> {
+  await requireAdmin();
   if (!isSupabaseAdminConfigured) {
     return {
       ok: false,
@@ -340,6 +343,7 @@ export async function updateAnnualReport(
 export async function deleteAnnualReport(
   fiscalYearRaw: string
 ): Promise<SubmitResult> {
+  await requireAdmin();
   if (!isSupabaseAdminConfigured) {
     return {
       ok: false,

@@ -6,6 +6,7 @@ import {
   getSupabaseAdmin,
   isSupabaseAdminConfigured,
 } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/supabase/require-admin";
 import { SEED_CATEGORIES } from "@/lib/policies-data";
 
 /*
@@ -113,6 +114,7 @@ async function resolveCategoryId(
 export async function submitPolicy(
   formData: FormData
 ): Promise<PolicySubmitResult> {
+  await requireAdmin();
   if (!isSupabaseAdminConfigured) {
     return { ok: false, message: SUPABASE_UNCONFIGURED };
   }
@@ -229,6 +231,7 @@ export interface UpdatePolicyInput {
 export async function updatePolicy(
   input: UpdatePolicyInput
 ): Promise<PolicySubmitResult> {
+  await requireAdmin();
   if (!isSupabaseAdminConfigured) {
     return { ok: false, message: SUPABASE_UNCONFIGURED };
   }
@@ -272,6 +275,7 @@ export async function updatePolicy(
 export async function deletePolicy(
   idRaw: string
 ): Promise<PolicySubmitResult> {
+  await requireAdmin();
   if (!isSupabaseAdminConfigured) {
     return { ok: false, message: SUPABASE_UNCONFIGURED };
   }

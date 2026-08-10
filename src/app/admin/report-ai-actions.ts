@@ -3,6 +3,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { PDFDocument } from "pdf-lib";
 import { extractText, getDocumentProxy } from "unpdf";
+import { requireAdmin } from "@/lib/supabase/require-admin";
 
 /*
   ── Gemini auto-extract for annual reports ──────────────────────────────
@@ -180,6 +181,7 @@ const PROMPT = [
 export async function parseReportPdf(
   formData: FormData
 ): Promise<ParseReportResult> {
+  await requireAdmin();
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return { ok: false, message: "AI extraction is not configured." };
 

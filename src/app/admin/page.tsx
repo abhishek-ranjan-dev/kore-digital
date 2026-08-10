@@ -28,6 +28,7 @@ import {
   Pencil,
   Trash2,
   ShieldCheck,
+  LogOut,
 } from "lucide-react";
 import {
   deleteAnnualReport,
@@ -48,11 +49,7 @@ import {
   type PolicySubmitResult,
   type UpdatePolicyInput,
 } from "./policies-actions";
-import {
-  parsePolicyPdf,
-  policyAiEnabled,
-  type PolicyDraft,
-} from "./policy-ai-actions";
+import { parsePolicyPdf, type PolicyDraft } from "./policy-ai-actions";
 import {
   parseReportPdf,
   reportAiEnabled,
@@ -77,10 +74,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { signOut } from "./auth-actions";
 
 /*
   /admin — investor data console (Operate mode, clean shadcn dashboard).
-  No application-level auth: gate at the deployment layer before production.
+  Gated by Supabase Auth: the `proxy` redirects non-admins to /admin/login and
+  every write action re-checks via requireAdmin(). See docs/admin-auth.md.
 */
 
 const PRIMARY_BTN =
@@ -99,6 +98,17 @@ export default function AdminPage() {
           <span className="text-sm text-muted-foreground">
             Investor data console
           </span>
+          <form action={signOut} className="ml-auto">
+            <Button
+              type="submit"
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="size-4" />
+              Sign out
+            </Button>
+          </form>
         </div>
       </header>
 
@@ -120,6 +130,9 @@ function Dashboard() {
   const [reports, setReports] = useState<AnnualReportRow[]>([]);
   const [policies, setPolicies] = useState<AdminPolicyRow[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  // The report and policy AI gates read the SAME env flag (GEMINI_API_KEY), so
+  // fetch it once here and pass it down — instead of each card round-tripping.
+  const [aiEnabled, setAiEnabled] = useState(false);
   const [pending, startRefresh] = useTransition();
   const [editingReport, setEditingReport] = useState<AnnualReportRow | null>(
     null
@@ -149,10 +162,22 @@ function Dashboard() {
     refreshAll();
   }, [refreshAll]);
 
+  useEffect(() => {
+    reportAiEnabled().then(setAiEnabled).catch(() => {});
+  }, []);
+
   return (
     <div className="space-y-6">
-      <AnnualReportCard reports={reports} onSubmitted={refreshReports} />
-      <PolicyUploadCard categories={categories} onUploaded={refreshPolicies} />
+      <AnnualReportCard
+        reports={reports}
+        aiEnabled={aiEnabled}
+        onSubmitted={refreshReports}
+      />
+      <PolicyUploadCard
+        categories={categories}
+        aiEnabled={aiEnabled}
+        onUploaded={refreshPolicies}
+      />
       <RepositoryCard
         reports={reports}
         policies={policies}
@@ -220,9 +245,11 @@ function toNum(s: string): number | null {
 
 function AnnualReportCard({
   reports,
+  aiEnabled,
   onSubmitted,
 }: {
   reports: AnnualReportRow[];
+  aiEnabled: boolean;
   onSubmitted: () => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
@@ -232,16 +259,11 @@ function AnnualReportCard({
   const [pending, startSubmit] = useTransition();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Gemini auto-extract (optional). `aiEnabled` gates the whole flow.
-  const [aiEnabled, setAiEnabled] = useState(false);
+  // Gemini auto-extract (optional). `aiEnabled` (a prop) gates the whole flow.
   const [parsing, setParsing] = useState(false);
   const [ai, setAi] = useState<Record<ReportField, boolean>>(NO_REPORT_AI);
   const [aiYear, setAiYear] = useState(false);
   const hasDraft = aiYear || Object.values(ai).some(Boolean);
-
-  useEffect(() => {
-    reportAiEnabled().then(setAiEnabled).catch(() => {});
-  }, []);
 
   const takenYears = useMemo(
     () => new Set(reports.map((r) => r.fiscalYear)),
@@ -590,9 +612,11 @@ const NO_AI: AiFields = { title: false, category: false, mandatoryUnder: false }
 
 function PolicyUploadCard({
   categories,
+  aiEnabled,
   onUploaded,
 }: {
   categories: string[];
+  aiEnabled: boolean;
   onUploaded: () => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
@@ -606,15 +630,10 @@ function PolicyUploadCard({
   const [pending, startUpload] = useTransition();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Gemini auto-extract (optional). `aiEnabled` gates the whole flow.
-  const [aiEnabled, setAiEnabled] = useState(false);
+  // Gemini auto-extract (optional). `aiEnabled` (a prop) gates the whole flow.
   const [parsing, setParsing] = useState(false);
   const [ai, setAi] = useState<AiFields>(NO_AI);
   const hasDraft = ai.title || ai.category || ai.mandatoryUnder;
-
-  useEffect(() => {
-    policyAiEnabled().then(setAiEnabled).catch(() => {});
-  }, []);
 
   const creatingCategory = category === NEW_CATEGORY;
   // The category name that will actually be submitted.
