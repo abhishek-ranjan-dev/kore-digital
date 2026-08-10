@@ -73,11 +73,6 @@ export interface ParseReportResult {
   message?: string;
 }
 
-/** True when Gemini auto-extract is configured. Cheap client-mount check. */
-export async function reportAiEnabled(): Promise<boolean> {
-  return Boolean(process.env.GEMINI_API_KEY);
-}
-
 /*
   Locate the financial-statement pages and return a trimmed PDF of just those.
   Returns null (→ caller sends the whole doc) when the report is short, has no

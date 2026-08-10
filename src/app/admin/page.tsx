@@ -50,11 +50,7 @@ import {
   type UpdatePolicyInput,
 } from "./policies-actions";
 import { parsePolicyPdf, type PolicyDraft } from "./policy-ai-actions";
-import {
-  parseReportPdf,
-  reportAiEnabled,
-  type ReportDraft,
-} from "./report-ai-actions";
+import { parseReportPdf, type ReportDraft } from "./report-ai-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -70,6 +66,7 @@ import {
   CardAction,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -82,13 +79,34 @@ import { signOut } from "./auth-actions";
   every write action re-checks via requireAdmin(). See docs/admin-auth.md.
 */
 
+// Glossy emerald primary CTA — the "Get in Touch" emerald with a top-lit
+// gradient sheen (see .btn-emerald-shine), dark obsidian label for contrast,
+// and a clean emerald focus outline.
 const PRIMARY_BTN =
-  "bg-emerald text-obsidian hover:bg-emerald/90 focus-visible:ring-emerald/40";
+  "btn-emerald-shine text-obsidian font-bold focus-visible:ring-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald";
 
 export default function AdminPage() {
   return (
-    <main className="dark min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
+    <main className="admin-theme dark relative min-h-screen overflow-x-hidden bg-slate-950 text-foreground">
+      {/*
+        Ambient glow canvas. `fixed inset-0` pins it to the viewport so the
+        spotlights stay put while the form scrolls; `overflow-hidden` clips any
+        gradient bleed (no stray horizontal scrollbar); `pointer-events-none` +
+        aria-hidden keep it out of hit-testing and the a11y tree; `-z-10` parks
+        it behind every card. Three layered radial ellipses — a top-center
+        violet key light, an emerald corner wash tying into the brand accent,
+        and a cool bottom-left fill for balance.
+      */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_100%_0%,rgba(16,185,129,0.10),rgba(255,255,255,0))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_0%_100%,rgba(56,89,148,0.12),rgba(255,255,255,0))]" />
+      </div>
+
+      <header className="sticky top-0 z-10 border-b border-border/60 bg-slate-950/70 backdrop-blur-xl">
         <div className="max-w-4xl mx-auto flex h-14 items-center gap-3 px-6 md:px-8">
           <div className="grid size-7 place-items-center rounded-md border border-emerald/25 bg-emerald/15 text-emerald">
             <Database className="size-3.5" />
@@ -130,9 +148,6 @@ function Dashboard() {
   const [reports, setReports] = useState<AnnualReportRow[]>([]);
   const [policies, setPolicies] = useState<AdminPolicyRow[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
-  // The report and policy AI gates read the SAME env flag (GEMINI_API_KEY), so
-  // fetch it once here and pass it down — instead of each card round-tripping.
-  const [aiEnabled, setAiEnabled] = useState(false);
   const [pending, startRefresh] = useTransition();
   const [editingReport, setEditingReport] = useState<AnnualReportRow | null>(
     null
@@ -162,22 +177,10 @@ function Dashboard() {
     refreshAll();
   }, [refreshAll]);
 
-  useEffect(() => {
-    reportAiEnabled().then(setAiEnabled).catch(() => {});
-  }, []);
-
   return (
     <div className="space-y-6">
-      <AnnualReportCard
-        reports={reports}
-        aiEnabled={aiEnabled}
-        onSubmitted={refreshReports}
-      />
-      <PolicyUploadCard
-        categories={categories}
-        aiEnabled={aiEnabled}
-        onUploaded={refreshPolicies}
-      />
+      <AnnualReportCard reports={reports} onSubmitted={refreshReports} />
+      <PolicyUploadCard categories={categories} onUploaded={refreshPolicies} />
       <RepositoryCard
         reports={reports}
         policies={policies}
@@ -245,11 +248,9 @@ function toNum(s: string): number | null {
 
 function AnnualReportCard({
   reports,
-  aiEnabled,
   onSubmitted,
 }: {
   reports: AnnualReportRow[];
-  aiEnabled: boolean;
   onSubmitted: () => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
@@ -259,7 +260,7 @@ function AnnualReportCard({
   const [pending, startSubmit] = useTransition();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Gemini auto-extract (optional). `aiEnabled` (a prop) gates the whole flow.
+  // Gemini auto-extract — always available (the API key is mandatory).
   const [parsing, setParsing] = useState(false);
   const [ai, setAi] = useState<Record<ReportField, boolean>>(NO_REPORT_AI);
   const [aiYear, setAiYear] = useState(false);
@@ -396,26 +397,21 @@ function AnnualReportCard({
   }
 
   return (
-    <Card>
+    <Card className="card-shine">
       <CardHeader>
         <CardTitle>Submit annual report</CardTitle>
         <CardDescription>
-          Attach the report PDF and enter the headline figures
-          {aiEnabled ? (
-            <>
-              {" "}
-              — or let <em>Magic AI extraction</em> draft them
-            </>
-          ) : null}
-          .
+          Attach the report PDF and enter the headline figures — or let{" "}
+          <em>Magic AI extraction</em> draft them.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-7">
-          {/* Row 1: document + fiscal year */}
-          <div className="grid items-start gap-6 sm:grid-cols-[minmax(0,1fr)_16rem]">
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-6">
+          {/* Top: document upload + fiscal year — balanced 2-col on desktop,
+              stacked on mobile. */}
+          <div className="grid gap-6 md:grid-cols-2">
             <FieldGroup>
-              <Label className="text-base">
+              <Label className="text-sm font-medium">
                 Report PDF <Req />
               </Label>
               <Dropzone
@@ -424,14 +420,14 @@ function AnnualReportCard({
                 onClear={() => handleFile(null)}
                 inputRef={fileInputRef}
               />
-              {aiEnabled && file ? (
+              {file ? (
                 <div className="space-y-1.5">
                   <Button
                     type="button"
                     variant="outline"
                     disabled={parsing}
                     onClick={() => file && runParse(file)}
-                    className="border-amber-400/40 text-amber-500 hover:bg-amber-400/10 hover:text-amber-400"
+                    className="h-11 w-full border-amber-400/40 text-amber-500 hover:bg-amber-400/10 hover:text-amber-400 sm:w-auto"
                   >
                     {parsing ? (
                       <Loader2 className="size-4 animate-spin" />
@@ -445,10 +441,12 @@ function AnnualReportCard({
                         : "Magic AI extraction"}
                   </Button>
                   {hasDraft && !parsing ? (
-                    <p className="flex items-center gap-1.5 text-xs text-amber-500">
-                      <Sparkles className="size-3.5" />
-                      AI-drafted — review the highlighted figures before
-                      submitting.
+                    <p className="flex items-start gap-1.5 text-xs text-amber-500">
+                      <Sparkles className="mt-0.5 size-3.5 shrink-0" />
+                      <span>
+                        AI-drafted — review the highlighted figures before
+                        submitting.
+                      </span>
                     </p>
                   ) : null}
                 </div>
@@ -456,7 +454,7 @@ function AnnualReportCard({
             </FieldGroup>
 
             <FieldGroup>
-              <Label htmlFor="fiscalYear" className="text-base">
+              <Label htmlFor="fiscalYear" className="text-sm font-medium">
                 Fiscal year <Req />
               </Label>
               <div className="flex items-center gap-2">
@@ -469,7 +467,7 @@ function AnnualReportCard({
                 >
                   <SelectTrigger
                     id="fiscalYear"
-                    className={`h-10 flex-1 text-base focus-visible:outline-none ${
+                    className={`h-11 flex-1 text-base focus-visible:ring-1 focus-visible:ring-ring/60 ${
                       aiYear ? AI_GLOW : ""
                     }`}
                   >
@@ -494,7 +492,7 @@ function AnnualReportCard({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="size-10 shrink-0 text-muted-foreground"
+                    className="size-11 shrink-0 text-muted-foreground"
                     onClick={() => {
                       setFiscalYear("");
                       setAiYear(false);
@@ -511,24 +509,15 @@ function AnnualReportCard({
             </FieldGroup>
           </div>
 
-          <Separator />
-
-          {/* Consolidated */}
-          <div className="space-y-4">
-            <GroupHeading
-              title="Consolidated (₹ Cr)"
-              hint="Feeds the headline scorecard. Margins auto-calculated."
-            />
+          {/* Consolidated — bordered panel */}
+          <Section
+            title="Consolidated (₹ Cr)"
+            hint="Feeds the headline scorecard. Margins auto-calculated."
+          >
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-              <Field name="total_income" label="Total Income" required placeholder={hasDraft ? "" : "327.82"} value={values.total_income} onChange={(v) => setField("total_income", v)} glow={ai.total_income} />
-              <Field name="operational_ebitda" label="Operational EBITDA" required placeholder={hasDraft ? "" : "47.55"} value={values.operational_ebitda} onChange={(v) => setField("operational_ebitda", v)} glow={ai.operational_ebitda} />
-              <Field name="pat" label="Profit After Tax" required placeholder={hasDraft ? "" : "31.70"} value={values.pat} onChange={(v) => setField("pat", v)} glow={ai.pat} />
-            </div>
-
-            {/* Live margin chips — show "—%" until both inputs are valid. */}
-            <div className="flex flex-wrap items-center gap-2">
-              <MarginChip label="EBITDA margin" value={ebitdaMargin} />
-              <MarginChip label="PAT margin" value={patMargin} />
+              <Field name="total_income" label="Total Income" required unit="Cr" placeholder={hasDraft ? "" : "327.82"} value={values.total_income} onChange={(v) => setField("total_income", v)} glow={ai.total_income} />
+              <Field name="operational_ebitda" label="Operational EBITDA" required unit="Cr" placeholder={hasDraft ? "" : "47.55"} value={values.operational_ebitda} onChange={(v) => setField("operational_ebitda", v)} glow={ai.operational_ebitda} labelBadge={<InlineMargin value={ebitdaMargin} />} />
+              <Field name="pat" label="Profit After Tax" required unit="Cr" placeholder={hasDraft ? "" : "31.70"} value={values.pat} onChange={(v) => setField("pat", v)} glow={ai.pat} labelBadge={<InlineMargin value={patMargin} />} />
             </div>
 
             {/* Instant soft warnings — non-blocking. */}
@@ -537,47 +526,38 @@ function AnnualReportCard({
                 {warnings.map((w) => (
                   <p
                     key={w}
-                    className="flex items-center gap-2 text-xs text-amber-500"
+                    className="flex items-start gap-2 text-xs text-amber-500"
                   >
-                    <AlertTriangle className="size-3.5 shrink-0" />
-                    {w}
+                    <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+                    <span>{w}</span>
                   </p>
                 ))}
               </div>
             ) : null}
-          </div>
+          </Section>
 
-          <Separator />
-
-          {/* Standalone */}
-          <div className="space-y-4">
-            <GroupHeading
-              title="Standalone (₹ Cr)"
-              hint="Feeds the historical table & chart."
-            />
+          {/* Standalone — bordered panel */}
+          <Section
+            title="Standalone (₹ Cr)"
+            hint="Feeds the historical table & chart."
+          >
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              <Field name="revenue" label="Revenue" required placeholder={hasDraft ? "" : "103.51"} value={values.revenue} onChange={(v) => setField("revenue", v)} glow={ai.revenue} />
-              <Field name="net_worth" label="Net Worth" required placeholder={hasDraft ? "" : "74.77"} value={values.net_worth} onChange={(v) => setField("net_worth", v)} glow={ai.net_worth} />
-              <Field name="long_term_borrowings" label="LT Borrowings" required placeholder={hasDraft ? "" : "0.11"} value={values.long_term_borrowings} onChange={(v) => setField("long_term_borrowings", v)} glow={ai.long_term_borrowings} />
-              <Field name="work_in_progress" label="Work-in-Progress" required placeholder={hasDraft ? "" : "24.45"} value={values.work_in_progress} onChange={(v) => setField("work_in_progress", v)} glow={ai.work_in_progress} />
+              <Field name="revenue" label="Revenue" required unit="Cr" placeholder={hasDraft ? "" : "103.51"} value={values.revenue} onChange={(v) => setField("revenue", v)} glow={ai.revenue} />
+              <Field name="net_worth" label="Net Worth" required unit="Cr" placeholder={hasDraft ? "" : "74.77"} value={values.net_worth} onChange={(v) => setField("net_worth", v)} glow={ai.net_worth} />
+              <Field name="long_term_borrowings" label="LT Borrowings" required unit="Cr" placeholder={hasDraft ? "" : "0.11"} value={values.long_term_borrowings} onChange={(v) => setField("long_term_borrowings", v)} glow={ai.long_term_borrowings} />
+              <Field name="work_in_progress" label="Work-in-Progress" required unit="Cr" placeholder={hasDraft ? "" : "24.45"} value={values.work_in_progress} onChange={(v) => setField("work_in_progress", v)} glow={ai.work_in_progress} />
             </div>
-          </div>
+          </Section>
+        </CardContent>
 
-          <Separator />
-
-          <div className="flex flex-wrap items-center gap-4">
-            <Button
-              type="submit"
-              disabled={pending || parsing || !file || !fiscalYear}
-              className={PRIMARY_BTN}
-            >
-              {pending ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <CheckCircle2 className="size-4" />
-              )}
-              {pending ? "Submitting…" : "Submit details"}
-            </Button>
+        {/* Action row — right-aligned on desktop, full-width stack on mobile. */}
+        <CardFooter className="mt-2 flex-wrap gap-3 border-t-0 bg-transparent">
+          {status && !pending ? (
+            <div className="w-full sm:w-auto sm:mr-auto">
+              <StatusLine status={status} />
+            </div>
+          ) : null}
+          <div className="flex w-full gap-3 sm:ml-auto sm:w-auto">
             <Button
               type="button"
               variant="outline"
@@ -586,14 +566,26 @@ function AnnualReportCard({
                 resetForm();
                 setStatus(null);
               }}
+              className="btn-glass h-11 flex-1 text-foreground sm:flex-none"
             >
               <Eraser className="size-4" />
               Clear
             </Button>
-            {status && !pending ? <StatusLine status={status} /> : null}
+            <Button
+              type="submit"
+              disabled={pending || parsing || !file || !fiscalYear}
+              className={`h-11 flex-1 sm:flex-none ${PRIMARY_BTN}`}
+            >
+              {pending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="size-4" />
+              )}
+              {pending ? "Submitting…" : "Submit details"}
+            </Button>
           </div>
-        </form>
-      </CardContent>
+        </CardFooter>
+      </form>
     </Card>
   );
 }
@@ -612,11 +604,9 @@ const NO_AI: AiFields = { title: false, category: false, mandatoryUnder: false }
 
 function PolicyUploadCard({
   categories,
-  aiEnabled,
   onUploaded,
 }: {
   categories: string[];
-  aiEnabled: boolean;
   onUploaded: () => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
@@ -630,7 +620,7 @@ function PolicyUploadCard({
   const [pending, startUpload] = useTransition();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Gemini auto-extract (optional). `aiEnabled` (a prop) gates the whole flow.
+  // Gemini auto-extract — always available (the API key is mandatory).
   const [parsing, setParsing] = useState(false);
   const [ai, setAi] = useState<AiFields>(NO_AI);
   const hasDraft = ai.title || ai.category || ai.mandatoryUnder;
@@ -732,26 +722,21 @@ function PolicyUploadCard({
   }
 
   return (
-    <Card>
+    <Card className="card-shine">
       <CardHeader>
         <CardTitle>Submit statutory policy</CardTitle>
         <CardDescription>
-          Attach the policy PDF, give it a title, and pick a category
-          {aiEnabled ? (
-            <>
-              {" "}
-              — or let <em>Magic AI extraction</em> draft them
-            </>
-          ) : null}
-          .
+          Attach the policy PDF, give it a title, and pick a category — or let{" "}
+          <em>Magic AI extraction</em> draft them.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-7">
-          {/* Row 1: document + title/category */}
-          <div className="grid items-start gap-6 sm:grid-cols-[minmax(0,1fr)_18rem]">
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-6">
+          {/* Top: document upload + category — balanced 2-col on desktop,
+              stacked on mobile (parity with the annual-report card). */}
+          <div className="grid gap-6 md:grid-cols-2">
             <FieldGroup>
-              <Label className="text-base">
+              <Label className="text-sm font-medium">
                 Policy PDF <Req />
               </Label>
               <Dropzone
@@ -760,14 +745,14 @@ function PolicyUploadCard({
                 onClear={() => handleFile(null)}
                 inputRef={fileInputRef}
               />
-              {aiEnabled && file ? (
+              {file ? (
                 <div className="space-y-1.5">
                   <Button
                     type="button"
                     variant="outline"
                     disabled={parsing}
                     onClick={() => file && runParse(file)}
-                    className="border-amber-400/40 text-amber-500 hover:bg-amber-400/10 hover:text-amber-400"
+                    className="h-11 w-full border-amber-400/40 text-amber-500 hover:bg-amber-400/10 hover:text-amber-400 sm:w-auto"
                   >
                     {parsing ? (
                       <Loader2 className="size-4 animate-spin" />
@@ -781,10 +766,12 @@ function PolicyUploadCard({
                         : "Magic AI extraction"}
                   </Button>
                   {hasDraft && !parsing ? (
-                    <p className="flex items-center gap-1.5 text-xs text-amber-500">
-                      <Sparkles className="size-3.5" />
-                      AI-drafted — review the highlighted fields before
-                      submitting.
+                    <p className="flex items-start gap-1.5 text-xs text-amber-500">
+                      <Sparkles className="mt-0.5 size-3.5 shrink-0" />
+                      <span>
+                        AI-drafted — review the highlighted fields before
+                        submitting.
+                      </span>
                     </p>
                   ) : null}
                 </div>
@@ -792,7 +779,7 @@ function PolicyUploadCard({
             </FieldGroup>
 
             <FieldGroup>
-              <Label htmlFor="policyCategory" className="text-base">
+              <Label htmlFor="policyCategory" className="text-sm font-medium">
                 Category <Req />
               </Label>
               <Select
@@ -804,7 +791,7 @@ function PolicyUploadCard({
               >
                 <SelectTrigger
                   id="policyCategory"
-                  className={`h-10 w-full text-base focus-visible:outline-none ${
+                  className={`h-11 w-full text-base focus-visible:ring-1 focus-visible:ring-ring/60 ${
                     ai.category ? AI_GLOW : ""
                   }`}
                 >
@@ -831,7 +818,7 @@ function PolicyUploadCard({
                   autoComplete="off"
                   autoFocus
                   placeholder="New category name"
-                  className={`mt-2 h-10 text-base focus-visible:outline-none ${
+                  className={`mt-2 h-11 text-base focus-visible:ring-1 focus-visible:ring-ring/60 ${
                     ai.category ? AI_GLOW : ""
                   }`}
                 />
@@ -839,62 +826,63 @@ function PolicyUploadCard({
             </FieldGroup>
           </div>
 
-          <Separator />
+          {/* Policy details — bordered panel (parity with the report card). */}
+          <Section
+            title="Policy details"
+            hint="Shown on the investor-relations policy list and detail drawer."
+          >
+            <FieldGroup>
+              <Label htmlFor="policyTitle" className="text-sm font-medium">
+                Title <Req />
+              </Label>
+              <Input
+                id="policyTitle"
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  setAi((a) => ({ ...a, title: false }));
+                }}
+                autoComplete="off"
+                placeholder={hasDraft ? "" : "Risk Management Policy"}
+                className={`h-11 text-base focus-visible:ring-1 focus-visible:ring-ring/60 ${
+                  ai.title ? AI_GLOW : ""
+                }`}
+              />
+            </FieldGroup>
 
-          <FieldGroup>
-            <Label htmlFor="policyTitle" className="text-base">
-              Title <Req />
-            </Label>
-            <Input
-              id="policyTitle"
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                setAi((a) => ({ ...a, title: false }));
-              }}
-              autoComplete="off"
-              placeholder={hasDraft ? "" : "Risk Management Policy"}
-              className={`h-10 text-base focus-visible:outline-none ${
-                ai.title ? AI_GLOW : ""
-              }`}
-            />
-          </FieldGroup>
+            <FieldGroup>
+              <Label htmlFor="policyMandatory" className="text-sm font-medium">
+                Mandatory under{" "}
+                <span className="text-muted-foreground">(optional)</span>
+              </Label>
+              <Input
+                id="policyMandatory"
+                value={mandatoryUnder}
+                onChange={(e) => {
+                  setMandatoryUnder(e.target.value);
+                  setAi((a) => ({ ...a, mandatoryUnder: false }));
+                }}
+                autoComplete="off"
+                placeholder={hasDraft ? "" : "SEBI LODR Regulation 46"}
+                className={`h-11 text-base focus-visible:ring-1 focus-visible:ring-ring/60 ${
+                  ai.mandatoryUnder ? AI_GLOW : ""
+                }`}
+              />
+              <p className="text-xs text-muted-foreground">
+                The statutory reference shown on the policy detail drawer.
+              </p>
+            </FieldGroup>
+          </Section>
+        </CardContent>
 
-          {/* Optional metadata */}
-          <FieldGroup>
-            <Label htmlFor="policyMandatory" className="text-base">
-              Mandatory under{" "}
-              <span className="text-muted-foreground">(optional)</span>
-            </Label>
-            <Input
-              id="policyMandatory"
-              value={mandatoryUnder}
-              onChange={(e) => {
-                setMandatoryUnder(e.target.value);
-                setAi((a) => ({ ...a, mandatoryUnder: false }));
-              }}
-              autoComplete="off"
-              placeholder={hasDraft ? "" : "SEBI LODR Regulation 46"}
-              className={`h-10 text-base focus-visible:outline-none ${
-                ai.mandatoryUnder ? AI_GLOW : ""
-              }`}
-            />
-            <p className="text-xs text-muted-foreground">
-              The statutory reference shown on the policy detail drawer.
-            </p>
-          </FieldGroup>
-
-          <Separator />
-
-          <div className="flex flex-wrap items-center gap-4">
-            <Button type="submit" disabled={!canSubmit} className={PRIMARY_BTN}>
-              {pending ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Upload className="size-4" />
-              )}
-              {pending ? "Submitting…" : "Submit policy"}
-            </Button>
+        {/* Action row — right-aligned on desktop, full-width stack on mobile. */}
+        <CardFooter className="mt-2 flex-wrap gap-3 border-t-0 bg-transparent">
+          {status && !pending ? (
+            <div className="w-full sm:w-auto sm:mr-auto">
+              <StatusLine status={status} />
+            </div>
+          ) : null}
+          <div className="flex w-full gap-3 sm:ml-auto sm:w-auto">
             <Button
               type="button"
               variant="outline"
@@ -903,14 +891,26 @@ function PolicyUploadCard({
                 reset();
                 setStatus(null);
               }}
+              className="btn-glass h-11 flex-1 text-foreground sm:flex-none"
             >
               <Eraser className="size-4" />
               Clear
             </Button>
-            {status && !pending ? <StatusLine status={status} /> : null}
+            <Button
+              type="submit"
+              disabled={!canSubmit}
+              className={`h-11 flex-1 sm:flex-none ${PRIMARY_BTN}`}
+            >
+              {pending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Upload className="size-4" />
+              )}
+              {pending ? "Submitting…" : "Submit policy"}
+            </Button>
           </div>
-        </form>
-      </CardContent>
+        </CardFooter>
+      </form>
     </Card>
   );
 }
@@ -1018,7 +1018,7 @@ function RepositoryCard({
   }));
 
   return (
-    <Card className={className}>
+    <Card className={`card-shine ${className ?? ""}`}>
       <CardHeader>
         <CardTitle>Document repository</CardTitle>
         <CardDescription>
@@ -1075,7 +1075,10 @@ function RepositoryCard({
 */
 function DrawerPortal({ children }: { children: React.ReactNode }) {
   if (typeof document === "undefined") return null;
-  return createPortal(<div className="dark">{children}</div>, document.body);
+  return createPortal(
+    <div className="admin-theme dark">{children}</div>,
+    document.body
+  );
 }
 
 /*
@@ -1684,6 +1687,8 @@ function Field({
   value,
   onChange,
   glow = false,
+  unit,
+  labelBadge,
 }: {
   name: string;
   label: string;
@@ -1692,34 +1697,94 @@ function Field({
   value: string;
   onChange: (v: string) => void;
   glow?: boolean;
+  /** Inline unit adornment inside the input (e.g. "Cr"). */
+  unit?: string;
+  /** Optional badge rendered at the right of the label row (e.g. a margin). */
+  labelBadge?: React.ReactNode;
 }) {
   return (
     // Flex column + h-full so inputs bottom-align across a grid row even when
     // a neighbour's label wraps to two lines (e.g. "Operational EBITDA").
     <div className="flex h-full flex-col gap-2">
-      <Label htmlFor={name} className="text-base">
-        {/* Keep the label text and the required asterisk on the same run so
-            the "*" wraps with the last word instead of floating to the side. */}
-        <span>
-          {label}
-          {required ? <> <Req /></> : null}
-        </span>
-      </Label>
-      <Input
-        id={name}
-        name={name}
-        type="number"
-        step="any"
-        inputMode="decimal"
-        autoComplete="off"
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`mt-auto h-10 text-base tabular-nums md:text-base focus-visible:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
-          glow ? AI_GLOW : ""
-        }`}
-      />
+      <div className="flex min-h-5 items-start justify-between gap-2">
+        <Label htmlFor={name} className="text-sm font-medium">
+          {/* Keep the label text and the required asterisk on the same run so
+              the "*" wraps with the last word instead of floating to the side. */}
+          <span>
+            {label}
+            {required ? <> <Req /></> : null}
+          </span>
+        </Label>
+        {labelBadge ? <div className="shrink-0">{labelBadge}</div> : null}
+      </div>
+      <div className="relative mt-auto">
+        <Input
+          id={name}
+          name={name}
+          type="number"
+          step="any"
+          inputMode="decimal"
+          autoComplete="off"
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`h-11 text-base tabular-nums focus-visible:ring-1 focus-visible:ring-ring/60 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
+            unit ? "pr-10" : ""
+          } ${glow ? AI_GLOW : ""}`}
+        />
+        {unit ? (
+          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium text-muted-foreground">
+            {unit}
+          </span>
+        ) : null}
+      </div>
     </div>
+  );
+}
+
+/*
+  A bordered sub-section (Consolidated / Standalone) — a recessed panel inside
+  the card that visually groups a set of figures. Replaces the old
+  separator-delimited blocks for a cleaner, scannable hierarchy.
+*/
+function Section({
+  title,
+  hint,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="admin-panel space-y-4 rounded-xl border p-4 sm:p-5">
+      <div className="space-y-0.5">
+        <h3 className="text-sm font-semibold">{title}</h3>
+        {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/*
+  Compact live-margin badge shown in a field's label row. Muted "—%" until a
+  valid percentage can be computed, then emerald.
+*/
+function InlineMargin({ value }: { value: number | null }) {
+  const empty = value == null;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium tabular-nums ${
+        empty
+          ? "border-border text-muted-foreground"
+          : "border-emerald/30 bg-emerald/10 text-emerald"
+      }`}
+      title="Margin (of Total Income)"
+    >
+      {empty ? "—%" : `${value.toFixed(1)}%`}
+      <span className="font-normal opacity-70">margin</span>
+    </span>
   );
 }
 
@@ -1752,6 +1817,15 @@ function Dropzone({
   inputRef: RefObject<HTMLInputElement | null>;
 }) {
   const [dragOver, setDragOver] = useState(false);
+
+  // Three visual states: uploaded (solid emerald), drag-over (emerald wash),
+  // idle (dashed, hover-lift). Uploaded uses a solid border; the others dashed.
+  const stateClasses = file
+    ? "border-solid border-emerald/30 bg-emerald/[0.05]"
+    : dragOver
+      ? "border-emerald/60 bg-emerald/10"
+      : "border-dashed border-[var(--admin-border)] bg-[var(--admin-inset)] hover:border-[var(--admin-border-strong)] hover:bg-[var(--admin-panel)]";
+
   return (
     <label
       onDragOver={(e) => {
@@ -1765,9 +1839,7 @@ function Dropzone({
         const f = e.dataTransfer.files?.[0];
         if (f) onFile(f);
       }}
-      className={`block cursor-pointer rounded-lg border border-dashed transition-colors ${
-        dragOver ? "border-ring bg-accent/40" : "border-input hover:bg-accent/30"
-      }`}
+      className={`block cursor-pointer rounded-lg border transition-colors ${stateClasses}`}
     >
       <input
         ref={inputRef}
@@ -1777,21 +1849,24 @@ function Dropzone({
         className="hidden"
       />
       {file ? (
-        <div className="flex items-center gap-3 p-4">
+        <div className="flex items-center gap-3 p-3.5">
           <div className="grid size-10 shrink-0 place-items-center rounded-md border border-emerald/20 bg-emerald/10 text-emerald">
             <FileText className="size-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">{file.name}</p>
+            <p className="flex items-center gap-1.5 text-sm font-medium">
+              <CheckCircle2 className="size-3.5 shrink-0 text-emerald" />
+              <span className="truncate">{file.name}</span>
+            </p>
             <p className="text-xs tabular-nums text-muted-foreground">
-              {formatBytes(file.size)}
+              {formatBytes(file.size)} · click to replace
             </p>
           </div>
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className="size-8 shrink-0"
+            className="size-9 shrink-0"
             onClick={(e) => {
               e.preventDefault();
               onClear();
@@ -1802,9 +1877,19 @@ function Dropzone({
           </Button>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-1.5 px-6 py-8 text-center">
-          <Upload className="size-5 text-muted-foreground" />
-          <p className="text-sm font-medium">Drop a PDF, or click to browse</p>
+        <div className="flex flex-col items-center gap-2 px-6 py-8 text-center">
+          <div
+            className={`grid size-10 place-items-center rounded-full border transition-colors ${
+              dragOver
+                ? "border-emerald/40 bg-emerald/15 text-emerald"
+                : "border-border bg-muted/40 text-muted-foreground"
+            }`}
+          >
+            <Upload className="size-4" />
+          </div>
+          <p className="text-sm font-medium">
+            {dragOver ? "Release to upload" : "Drop a PDF, or click to browse"}
+          </p>
           <p className="text-xs text-muted-foreground">PDF · up to 25 MB</p>
         </div>
       )}

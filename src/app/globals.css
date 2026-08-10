@@ -150,6 +150,175 @@
     0 0 0 1px rgba(16, 185, 129, 0.15);
 }
 
+/*
+  ── Apple-style glossy card ───────────────────────────────────────────
+  Premium panel for the /admin console cards: a soft top-lit gradient
+  fill, a gradient hairline border (brighter at the top, as if lit from
+  above), a faint rim glint on the top edge, and a layered depth shadow.
+  Plain (unlayered) rule so the gradient background + shadow win over the
+  base `bg-card` / ring utilities. Sits under the `dark` admin theme.
+*/
+.card-shine {
+  position: relative;
+  /*
+    Three stacked background layers with per-layer clip:
+      1. top sheen  (padding-box) — soft white highlight, brightest at top
+      2. body fill  (padding-box) — the elevated --card surface (token-driven)
+      3. hairline   (border-box)  — top-lit gradient shown only in the 1px
+                                    transparent border, so it rounds cleanly
+                                    (no mask sentinel colors needed).
+  */
+  border: 1px solid transparent;
+  background:
+    linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.055) 0%,
+        rgba(255, 255, 255, 0.014) 42%,
+        rgba(255, 255, 255, 0) 100%
+      )
+      padding-box,
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.22) 0%,
+        rgba(255, 255, 255, 0.06) 32%,
+        rgba(255, 255, 255, 0.02) 100%
+      )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 24px 50px -26px rgba(0, 0, 0, 0.8);
+  transition:
+    box-shadow 320ms ease,
+    transform 320ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Rim glint — a bright sliver catching the very top edge. */
+.card-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.45),
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* Gentle hover — deepen the shadow + brighten the top highlight. */
+.card-shine:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 30px 60px -24px rgba(0, 0, 0, 0.85);
+}
+
+/*
+  /admin glass cards. The admin console floats its card-shine cards over an
+  ambient radial-glow canvas (see AdminPage), so here we swap the opaque body
+  fill for a translucent one and turn on a backdrop blur — the glow diffuses
+  softly through the card instead of being fully occluded, which is what sells
+  the "floating / elevated" read. Mirrors the base card-shine layer stack (top
+  sheen, body fill, hairline border) with only the middle fill made see-through.
+  Scoped to .admin-theme so the rest of the site's cards stay fully opaque.
+*/
+.admin-theme .card-shine {
+  background:
+    linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.055) 0%,
+        rgba(255, 255, 255, 0.014) 42%,
+        rgba(255, 255, 255, 0) 100%
+      )
+      padding-box,
+    linear-gradient(
+        color-mix(in srgb, var(--card) 78%, transparent),
+        color-mix(in srgb, var(--card) 78%, transparent)
+      )
+      padding-box,
+    linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.22) 0%,
+        rgba(255, 255, 255, 0.06) 32%,
+        rgba(255, 255, 255, 0.02) 100%
+      )
+      border-box;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/*
+  ── Glossy emerald CTA ────────────────────────────────────────────────
+  The "Get in Touch" emerald fill (brand tokens) with a top-lit gloss so
+  it shines: a soft white highlight over an emerald → emerald-ink gradient,
+  a crisp inset top edge, and a gentle lift shadow. Pair with `text-obsidian
+  font-bold` for a high-contrast dark label. Plain (unlayered) rule so the
+  gradient wins over the button variant's flat background.
+*/
+.btn-emerald-shine {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.28) 0%,
+      rgba(255, 255, 255, 0.06) 45%,
+      rgba(255, 255, 255, 0) 100%
+    ),
+    linear-gradient(180deg, var(--color-emerald) 0%, var(--color-emerald-ink) 135%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 4px 12px -2px rgba(0, 0, 0, 0.35);
+  transition:
+    filter 200ms ease,
+    box-shadow 200ms ease;
+}
+.btn-emerald-shine:hover {
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 6px 16px -2px rgba(0, 0, 0, 0.45);
+}
+
+/*
+  Neutral glass CTA — the secondary counterpart to .btn-emerald-shine. A dark
+  glossy panel with a top-lit highlight and hairline border, for "Clear" and
+  other secondary actions. Keeps the same gloss language, no accent color.
+*/
+.btn-glass {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.02) 45%,
+      rgba(255, 255, 255, 0) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.015) 100%
+    );
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 4px 12px -2px rgba(0, 0, 0, 0.35);
+  transition:
+    filter 200ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+}
+.btn-glass:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  filter: brightness(1.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 6px 16px -2px rgba(0, 0, 0, 0.45);
+}
+
 /* Ticker pulse — for the "live" ISIN / NSE dots. */
 @keyframes ticker-pulse {
   0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
@@ -400,4 +569,50 @@ body {
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
+}
+
+/*
+  ── /admin refined dark palette ───────────────────────────────────────
+  Scoped to `.admin-theme` (the admin console wrapper) so the rest of the
+  site's shadcn tokens are untouched. A cool near-neutral elevation scale
+  — deliberately NOT pure black — with clear tiers so the surfaces read as
+  layered instead of muddy:
+
+    canvas (--background)  <  card (--card)  <  panel  <  inset input
+
+  Focus rings are emerald for an accessible, on-brand highlight.
+*/
+.admin-theme {
+  --background: #0a0d12;               /* outer page canvas — darkest tier */
+  --card: #12161f;                     /* elevated card surface (card-shine fill) */
+  --card-foreground: #f1f5f9;
+  --popover: #12161f;
+  --popover-foreground: #f1f5f9;
+  --muted: #1b2230;
+  --muted-foreground: #a3b0c2;         /* readable cool-slate secondary text */
+  --border: rgba(255, 255, 255, 0.09);
+  --input: rgba(255, 255, 255, 0.1);   /* input BORDER tint (bg set below) */
+  --ring: var(--color-emerald);        /* emerald focus ring */
+
+  /* Inner surface tiers. */
+  --admin-panel: #0d1119;              /* recessed grouping panel (Sections) */
+  --admin-inset: #0a0e14;              /* deepest inset (inputs, dropzone) */
+  --admin-border: rgba(255, 255, 255, 0.07);
+  --admin-border-strong: rgba(255, 255, 255, 0.12);
+}
+
+/* Recessed grouping panel — sits on the card, holds inset inputs. */
+.admin-panel {
+  background-color: var(--admin-panel);
+  border-color: var(--admin-border);
+}
+
+/*
+  Inputs & select triggers inside the admin form become solid inset surfaces
+  (deeper than the panel). Unlayered + scoped so it wins over the shadcn
+  `dark:bg-input/30` wash, while leaving borders, focus rings and the amber
+  AI-glow (all border-color / box-shadow, not background) fully intact.
+*/
+.admin-theme :is([data-slot="input"], [data-slot="select-trigger"]) {
+  background-color: var(--admin-inset);
 }
