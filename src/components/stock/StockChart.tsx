@@ -80,8 +80,18 @@ export default function StockChart({
     return span > 400 * DAY;
   }, [filtered]);
 
-  const color = positive ? "#10B981" : "#EF4444"; // emerald / red
-  const gradientId = `stock-fill-${positive ? "up" : "down"}`;
+  // Color the line/fill by the DISPLAYED range's trend (first → last plotted
+  // price), not the intraday change — so it always matches what's on screen and
+  // updates when the range changes. Falls back to the daily `positive` prop when
+  // the range has too few points to compute a trend. (The header badge still
+  // uses the daily change; that's a separate signal.)
+  const trendPositive = useMemo(() => {
+    if (filtered.length < 2) return positive;
+    return filtered[filtered.length - 1].price >= filtered[0].price;
+  }, [filtered, positive]);
+
+  const color = trendPositive ? "#10B981" : "#EF4444"; // emerald / red
+  const gradientId = `stock-fill-${trendPositive ? "up" : "down"}`;
 
   return (
     <div>
