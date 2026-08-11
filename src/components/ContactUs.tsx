@@ -33,10 +33,7 @@ export default function ContactUs() {
   }
 
   return (
-    <section
-      id="contact"
-      className="border-t border-white/10 bg-obsidian py-20 md:py-28"
-    >
+    <section id="contact" className="bg-obsidian py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-start">
           <div className="space-y-6">
