@@ -29,7 +29,15 @@ import {
   Trash2,
   ShieldCheck,
   LogOut,
+  FilePlus2,
+  FolderOpen,
+  CalendarRange,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Megaphone,
+  Menu,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import {
   deleteAnnualReport,
   listAnnualReports,
@@ -72,6 +80,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { signOut } from "./auth-actions";
+import { StripeGradientShader } from "@/components/ui/stripe-like-gradient-shader";
 
 /*
   /admin — investor data console (Operate mode, clean shadcn dashboard).
@@ -85,62 +94,408 @@ import { signOut } from "./auth-actions";
 const PRIMARY_BTN =
   "btn-emerald-shine text-obsidian font-bold focus-visible:ring-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald";
 
+/*
+  Top-level sidebar sections. Only "documents" is built today; "updates" is a
+  visible-but-stubbed placeholder that proves the shell scales (future: post
+  investor updates — videos, text, announcements). Add a section here + a
+  `SECTION_META` entry + a branch in the content switch to grow the console.
+*/
+type SectionId = "documents" | "updates";
+
+const SECTION_META: Record<
+  SectionId,
+  {
+    title: string;
+    desc: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }
+> = {
+  documents: {
+    title: "Documents",
+    desc: "Annual reports & statutory policies — figures publish live to investor relations.",
+    icon: FolderOpen,
+  },
+  updates: {
+    title: "Updates",
+    desc: "Announcements, videos and short notes for investors.",
+    icon: Megaphone,
+  },
+};
+
 export default function AdminPage() {
+  // Collapsed = icon-only rail (desktop). Below `md` the desktop rail is hidden
+  // entirely and the hamburger opens `MobileSidebar` as an off-canvas drawer.
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [section, setSection] = useState<SectionId>("documents");
+  const meta = SECTION_META[section];
+
+  // Close the mobile drawer on Escape.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
+
   return (
-    <main className="admin-theme dark relative min-h-screen overflow-x-hidden bg-slate-950 text-foreground">
+    // App shell: the viewport height is fixed and only the content region
+    // scrolls, so the sidebar stays put (a `sticky` sidebar breaks when an
+    // ancestor becomes a scroll container, e.g. via overflow-x).
+    <main className="admin-theme dark relative h-dvh overflow-hidden bg-obsidian text-foreground">
       {/*
-        Ambient glow canvas. `fixed inset-0` pins it to the viewport so the
-        spotlights stay put while the form scrolls; `overflow-hidden` clips any
-        gradient bleed (no stray horizontal scrollbar); `pointer-events-none` +
-        aria-hidden keep it out of hit-testing and the a11y tree; `-z-10` parks
-        it behind every card. Three layered radial ellipses — a top-center
-        violet key light, an emerald corner wash tying into the brand accent,
-        and a cool bottom-left fill for balance.
+        Animated WebGL gradient-shader canvas (page layout background ONLY —
+        never a card surface). `fixed inset-0` pins it to the viewport so it
+        stays put while the form scrolls; `overflow-hidden` clips it; the
+        obsidian container color covers the pre-mount frame; `pointer-events-none`
+        + aria-hidden keep it out of hit-testing and the a11y tree; `-z-10`
+        parks it behind every card. The obsidian/30 scrim on top keeps the
+        translucent glass cards legible over the moving gradient.
       */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-obsidian"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_100%_0%,rgba(16,185,129,0.10),rgba(255,255,255,0))]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_0%_100%,rgba(56,89,148,0.12),rgba(255,255,255,0))]" />
+        <StripeGradientShader className="absolute inset-0 h-full w-full" />
+        <div className="absolute inset-0 bg-obsidian/30" />
       </div>
 
-      <header className="sticky top-0 z-10 border-b border-border/60 bg-slate-950/70 backdrop-blur-xl">
-        <div className="max-w-4xl mx-auto flex h-14 items-center gap-3 px-6 md:px-8">
-          <div className="grid size-7 place-items-center rounded-md border border-emerald/25 bg-emerald/15 text-emerald">
-            <Database className="size-3.5" />
-          </div>
-          <span className="text-sm font-semibold">Kore Digital</span>
-          <Separator orientation="vertical" className="h-4" />
-          <span className="text-sm text-muted-foreground">
-            Investor data console
-          </span>
-          <form action={signOut} className="ml-auto">
-            <Button
-              type="submit"
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-foreground"
+      <div className="flex h-full">
+        <Sidebar
+          collapsed={collapsed}
+          onToggleCollapsed={() => setCollapsed((c) => !c)}
+          section={section}
+          onSection={setSection}
+        />
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* Mobile-only top bar — sits above the scroll region (the desktop
+              rail is hidden below md), so the menu stays fixed on scroll. */}
+          <header className="flex h-14 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-obsidian/80 px-4 backdrop-blur-xl md:hidden">
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+              className="-ml-1 grid size-9 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              <LogOut className="size-4" />
-              Sign out
-            </Button>
-          </form>
-        </div>
-      </header>
+              <Menu className="size-5" />
+            </button>
+            <div className="grid size-8 shrink-0 place-items-center rounded-md border border-emerald/25 bg-emerald/15 text-emerald">
+              <Database className="size-4" />
+            </div>
+            <span className="text-sm font-semibold">Kore Digital</span>
+          </header>
 
-      <div className="max-w-4xl mx-auto space-y-8 px-6 py-8 md:px-8 md:py-10">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">Data console</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Submit annual reports and statutory policies. Annual-report figures
-            publish live to the investor-relations page.
-          </p>
+          {/* Only this region scrolls. */}
+          <div className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+            <div className="mx-auto w-full max-w-5xl px-5 py-8 md:px-8 md:py-10">
+              <PageHeading meta={meta} />
+              {section === "documents" ? (
+                <Dashboard />
+              ) : (
+                <ComingSoon meta={meta} />
+              )}
+            </div>
+          </div>
         </div>
-        <Dashboard />
       </div>
+
+      <MobileSidebar
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        section={section}
+        onSection={setSection}
+      />
     </main>
+  );
+}
+
+/*
+  Page heading — the section title + description live in the content (the old
+  fixed top bar was removed). The mobile menu trigger lives in the mobile top
+  bar (above the scroll region), so it isn't repeated here.
+*/
+function PageHeading({
+  meta,
+}: {
+  meta: { title: string; desc: string; icon: React.ComponentType<{ className?: string }> };
+}) {
+  return (
+    <div className="mb-6">
+      <h1 className="text-xl font-semibold tracking-tight">{meta.title}</h1>
+      <p className="mt-1 text-sm text-muted-foreground">{meta.desc}</p>
+    </div>
+  );
+}
+
+/*
+  Collapsible left rail: brand mark, section nav, and the sign-out action
+  (moved here from the old top header). The active item is a shared `motion`
+  layer keyed by `layoutId`, so it springs between sections — the animated
+  active-indicator idea is adapted from a 21st.dev sidebar, re-themed to the
+  emerald-on-obsidian brand and simplified to an icon-rail collapse.
+*/
+const NAV: {
+  id: SectionId;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  soon?: boolean;
+}[] = [
+  { id: "documents", label: "Documents", icon: FolderOpen },
+  { id: "updates", label: "Updates", icon: Megaphone, soon: true },
+];
+
+/*
+  Shared sidebar body — brand, section nav, footer (collapse + sign out). Used
+  in two shells: the persistent desktop rail (`Sidebar`) and the mobile
+  off-canvas drawer (`MobileSidebar`). `expanded` drives labels + alignment (an
+  icon-only rail when false); `layoutId` namespaces the animated active pill so
+  the two mounted instances never share one.
+*/
+function SidebarContent({
+  expanded,
+  section,
+  onSection,
+  layoutId,
+  onToggleCollapsed,
+  onClose,
+}: {
+  expanded: boolean;
+  section: SectionId;
+  onSection: (id: SectionId) => void;
+  layoutId: string;
+  onToggleCollapsed?: () => void;
+  onClose?: () => void;
+}) {
+  const btnBase =
+    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground";
+  return (
+    <>
+      {/* Brand */}
+      <div className="flex h-16 shrink-0 items-center gap-3 px-4">
+        <div className="grid size-9 shrink-0 place-items-center rounded-lg border border-emerald/25 bg-emerald/15 text-emerald">
+          <Database className="size-4" />
+        </div>
+        {expanded ? (
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold leading-tight">
+              Kore Digital
+            </p>
+            <p className="truncate text-xs text-muted-foreground">
+              Admin Console
+            </p>
+          </div>
+        ) : null}
+        {onClose ? (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close menu"
+            className="grid size-8 shrink-0 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <X className="size-4" />
+          </button>
+        ) : null}
+      </div>
+
+      {/* Section nav */}
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-3">
+        {NAV.map((item) => (
+          <NavItem
+            key={item.id}
+            icon={item.icon}
+            label={item.label}
+            soon={item.soon}
+            active={section === item.id}
+            expanded={expanded}
+            layoutId={layoutId}
+            onClick={() => onSection(item.id)}
+          />
+        ))}
+      </nav>
+
+      {/* Footer: collapse toggle (desktop only) + sign out */}
+      <div className="shrink-0 space-y-1 border-t border-border/60 px-3 py-3">
+        {onToggleCollapsed ? (
+          <button
+            type="button"
+            onClick={onToggleCollapsed}
+            title={expanded ? "Collapse sidebar" : "Expand sidebar"}
+            aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
+            className={`${btnBase} ${expanded ? "justify-start" : "justify-center"}`}
+          >
+            {expanded ? (
+              <PanelLeftClose className="size-4 shrink-0" />
+            ) : (
+              <PanelLeftOpen className="size-4 shrink-0" />
+            )}
+            {expanded ? <span className="truncate">Collapse</span> : null}
+          </button>
+        ) : null}
+
+        <form action={signOut}>
+          <button
+            type="submit"
+            title={!expanded ? "Sign out" : undefined}
+            className={`${btnBase} ${expanded ? "justify-start" : "justify-center"}`}
+          >
+            <LogOut className="size-4 shrink-0" />
+            {expanded ? <span className="truncate">Sign out</span> : null}
+          </button>
+        </form>
+      </div>
+    </>
+  );
+}
+
+/* Persistent desktop rail — hidden below `md`, where the drawer takes over. */
+function Sidebar({
+  collapsed,
+  onToggleCollapsed,
+  section,
+  onSection,
+}: {
+  collapsed: boolean;
+  onToggleCollapsed: () => void;
+  section: SectionId;
+  onSection: (id: SectionId) => void;
+}) {
+  return (
+    <aside
+      className={`hidden h-full shrink-0 flex-col border-r border-white/[0.06] bg-[image:linear-gradient(to_bottom,var(--card),var(--admin-inset))] shadow-[1px_0_0_0_rgba(0,0,0,0.4)] transition-[width] duration-300 ease-out md:flex ${
+        collapsed ? "w-16" : "w-64"
+      }`}
+    >
+      <SidebarContent
+        expanded={!collapsed}
+        section={section}
+        onSection={onSection}
+        onToggleCollapsed={onToggleCollapsed}
+        layoutId="admin-nav-desktop"
+      />
+    </aside>
+  );
+}
+
+/* Mobile off-canvas drawer — opened by the top-bar hamburger. */
+function MobileSidebar({
+  open,
+  onClose,
+  section,
+  onSection,
+}: {
+  open: boolean;
+  onClose: () => void;
+  section: SectionId;
+  onSection: (id: SectionId) => void;
+}) {
+  return (
+    <div
+      className={`fixed inset-0 z-40 md:hidden ${open ? "" : "pointer-events-none"}`}
+      aria-hidden={!open}
+    >
+      <div
+        onClick={onClose}
+        className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+          open ? "opacity-100" : "opacity-0"
+        }`}
+      />
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu"
+        className={`absolute inset-y-0 left-0 flex w-72 max-w-[82%] flex-col border-r border-white/[0.06] bg-[image:linear-gradient(to_bottom,var(--card),var(--admin-inset))] shadow-2xl transition-transform duration-300 ease-out ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <SidebarContent
+          expanded
+          section={section}
+          onSection={(id) => {
+            onSection(id);
+            onClose();
+          }}
+          onClose={onClose}
+          layoutId="admin-nav-mobile"
+        />
+      </aside>
+    </div>
+  );
+}
+
+function NavItem({
+  icon: Icon,
+  label,
+  active,
+  soon,
+  expanded,
+  layoutId,
+  onClick,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  active: boolean;
+  soon?: boolean;
+  expanded: boolean;
+  layoutId: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={!expanded ? label : undefined}
+      aria-current={active ? "page" : undefined}
+      className={`relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+        expanded ? "justify-start" : "justify-center"
+      } ${
+        active
+          ? "text-emerald"
+          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+      }`}
+    >
+      {active ? (
+        <motion.span
+          layoutId={layoutId}
+          aria-hidden
+          className="absolute inset-0 rounded-lg border border-emerald/30 bg-emerald/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+          transition={{ type: "spring", stiffness: 520, damping: 36 }}
+        />
+      ) : null}
+      <Icon className="relative z-10 size-4 shrink-0" />
+      {expanded ? (
+        <span className="relative z-10 flex-1 truncate text-left">{label}</span>
+      ) : null}
+      {expanded && soon ? (
+        <span className="relative z-10 shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
+          Soon
+        </span>
+      ) : null}
+    </button>
+  );
+}
+
+function ComingSoon({
+  meta,
+}: {
+  meta: { title: string; desc: string; icon: React.ComponentType<{ className?: string }> };
+}) {
+  const Icon = meta.icon;
+  return (
+    <div className="card-shine flex flex-col items-center justify-center gap-4 rounded-2xl px-6 py-24 text-center">
+      <div className="grid size-14 place-items-center rounded-2xl border border-emerald/20 bg-emerald/10 text-emerald">
+        <Icon className="size-6" />
+      </div>
+      <div className="space-y-1.5">
+        <h2 className="text-lg font-semibold">Coming soon</h2>
+        <p className="mx-auto max-w-md text-sm text-muted-foreground">
+          Post announcements, videos and short notes for investors here — this
+          section is on the roadmap.
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -177,18 +532,57 @@ function Dashboard() {
     refreshAll();
   }, [refreshAll]);
 
+  // Two-tab console: "Submit" holds both upload forms; "Repository" holds the
+  // submitted-document list. Both panels stay mounted (toggled with `hidden`)
+  // so a half-filled form survives a tab switch.
+  const [tab, setTab] = useState<TabId>("submit");
+  const totalDocs = reports.length + policies.length;
+
   return (
     <div className="space-y-6">
-      <AnnualReportCard reports={reports} onSubmitted={refreshReports} />
-      <PolicyUploadCard categories={categories} onUploaded={refreshPolicies} />
-      <RepositoryCard
+      <OverviewStrip
         reports={reports}
         policies={policies}
-        pending={pending}
-        onRefresh={refreshAll}
-        onEditReport={setEditingReport}
-        onEditPolicy={setEditingPolicy}
+        categories={categories}
       />
+
+      <TabBar
+        active={tab}
+        onChange={setTab}
+        tabs={[
+          { id: "submit", label: "Submit", icon: FilePlus2 },
+          {
+            id: "repository",
+            label: "Repository",
+            icon: FolderOpen,
+            count: totalDocs,
+          },
+        ]}
+      />
+
+      <div
+        role="tabpanel"
+        aria-hidden={tab !== "submit"}
+        className={tab === "submit" ? "space-y-6" : "hidden"}
+      >
+        <AnnualReportCard reports={reports} onSubmitted={refreshReports} />
+        <PolicyUploadCard categories={categories} onUploaded={refreshPolicies} />
+      </div>
+      <div
+        role="tabpanel"
+        aria-hidden={tab !== "repository"}
+        className={tab === "repository" ? "" : "hidden"}
+      >
+        <RepositoryCard
+          reports={reports}
+          policies={policies}
+          pending={pending}
+          onRefresh={refreshAll}
+          onEditReport={setEditingReport}
+          onEditPolicy={setEditingPolicy}
+        />
+      </div>
+
       <EditReportDrawer
         key={`report-${editingReport?.fiscalYear ?? "none"}`}
         report={editingReport}
@@ -202,6 +596,137 @@ function Dashboard() {
         onClose={() => setEditingPolicy(null)}
         onSaved={refreshPolicies}
       />
+    </div>
+  );
+}
+
+/* ═══ Console overview + tabs ════════════════════════════════════════ */
+
+type TabId = "submit" | "repository";
+
+type TabDef = {
+  id: TabId;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  count?: number;
+};
+
+/*
+  Segmented tab control. The active pill is a shared `motion` layer keyed by
+  `layoutId`, so it slides between tabs with a spring (pattern adapted from a
+  21st.dev segmented control, re-themed to the emerald-on-obsidian brand).
+*/
+function TabBar({
+  tabs,
+  active,
+  onChange,
+}: {
+  tabs: TabDef[];
+  active: TabId;
+  onChange: (id: TabId) => void;
+}) {
+  return (
+    <div
+      role="tablist"
+      aria-label="Console sections"
+      className="admin-panel inline-flex w-full items-center gap-1 rounded-xl border p-1 sm:w-auto"
+    >
+      {tabs.map((t) => {
+        const isActive = t.id === active;
+        const Icon = t.icon;
+        return (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            onClick={() => onChange(t.id)}
+            className={`relative flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald sm:flex-none ${
+              isActive
+                ? "text-emerald"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {isActive ? (
+              <motion.span
+                layoutId="admin-tab-pill"
+                aria-hidden
+                className="absolute inset-0 rounded-lg border border-emerald/30 bg-emerald/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                transition={{ type: "spring", stiffness: 520, damping: 36 }}
+              />
+            ) : null}
+            <span className="relative z-10 flex items-center gap-2">
+              <Icon className="size-4" />
+              {t.label}
+              {t.count != null ? (
+                <span
+                  className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ${
+                    isActive
+                      ? "bg-emerald/20 text-emerald"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {t.count}
+                </span>
+              ) : null}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/*
+  At-a-glance KPI strip above the tabs. Purely derived from the loaded rows —
+  gives the console a "dashboard" read without another data round-trip.
+*/
+function OverviewStrip({
+  reports,
+  policies,
+  categories,
+}: {
+  reports: AnnualReportRow[];
+  policies: AdminPolicyRow[];
+  categories: string[];
+}) {
+  const latestFy =
+    reports.length > 0
+      ? [...reports.map((r) => r.fiscalYear)].sort().at(-1) ?? "—"
+      : "—";
+  const stats: {
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    value: React.ReactNode;
+  }[] = [
+    { icon: FileText, label: "Annual reports", value: reports.length },
+    { icon: ShieldCheck, label: "Statutory policies", value: policies.length },
+    { icon: FolderOpen, label: "Policy categories", value: categories.length },
+    { icon: CalendarRange, label: "Latest fiscal year", value: latestFy },
+  ];
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {stats.map((s) => {
+        const Icon = s.icon;
+        return (
+          <div
+            key={s.label}
+            className="admin-panel rounded-xl border p-4"
+          >
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="grid size-6 shrink-0 place-items-center rounded-md border border-emerald/20 bg-emerald/10 text-emerald">
+                <Icon className="size-3.5" />
+              </div>
+              <span className="text-[10px] font-medium uppercase tracking-[0.16em]">
+                {s.label}
+              </span>
+            </div>
+            <p className="mt-2.5 text-2xl font-bold tabular-nums text-foreground">
+              {s.value}
+            </p>
+          </div>
+        );
+      })}
     </div>
   );
 }
