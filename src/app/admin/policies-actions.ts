@@ -1,10 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import {
-  getSupabaseAdmin,
-  isSupabaseAdminConfigured,
-} from "@/lib/supabase/server";
+import { isSupabaseReadConfigured } from "@/lib/supabase/server";
+import { createAuthServerClient } from "@/lib/supabase/auth-server";
 import { requireAdmin } from "@/lib/supabase/require-admin";
 import { parseStagedRef } from "@/lib/supabase/staging-types";
 import { commitStagedFile, removeStagedFile } from "@/lib/supabase/staging";
@@ -38,7 +36,7 @@ export interface AdminPolicyRow {
 }
 
 const SUPABASE_UNCONFIGURED =
-  "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.";
+  "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and the publishable key.";
 
 function slugify(s: string): string {
   return (
@@ -55,9 +53,8 @@ function slugify(s: string): string {
    Seed order first, then DB extras — deduped by name. */
 export async function listPolicyCategories(): Promise<string[]> {
   const merged = [...SEED_CATEGORIES] as string[];
-  if (!isSupabaseAdminConfigured) return merged;
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return merged;
+  if (!isSupabaseReadConfigured) return merged;
+  const supabase = await createAuthServerClient();
 
   const { data } = await supabase
     .from("policy_categories")
@@ -78,7 +75,7 @@ export async function listPolicyCategories(): Promise<string[]> {
 
 /** Get-or-create a category by name; returns its id (or null on failure). */
 async function resolveCategoryId(
-  supabase: NonNullable<ReturnType<typeof getSupabaseAdmin>>,
+  supabase: Awaited<ReturnType<typeof createAuthServerClient>>,
   rawName: string
 ): Promise<string | null> {
   const name = rawName.trim();
@@ -114,11 +111,10 @@ export async function submitPolicy(
   formData: FormData
 ): Promise<PolicySubmitResult> {
   await requireAdmin();
-  if (!isSupabaseAdminConfigured) {
+  if (!isSupabaseReadConfigured) {
     return { ok: false, message: SUPABASE_UNCONFIGURED };
   }
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return { ok: false, message: "Supabase client unavailable." };
+  const supabase = await createAuthServerClient();
 
   // The PDF was uploaded straight to Storage from the browser (bypassing the
   // 4.5 MB Server-Action body cap); we get only a reference to it here. Every
@@ -194,9 +190,8 @@ export async function submitPolicy(
 
 /* ─── List policies (admin repository) ──────────────────────────────── */
 export async function listPolicies(): Promise<AdminPolicyRow[]> {
-  if (!isSupabaseAdminConfigured) return [];
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return [];
+  if (!isSupabaseReadConfigured) return [];
+  const supabase = await createAuthServerClient();
   const { data, error } = await supabase
     .from("policy_documents")
     .select(
@@ -236,11 +231,10 @@ export async function updatePolicy(
   input: UpdatePolicyInput
 ): Promise<PolicySubmitResult> {
   await requireAdmin();
-  if (!isSupabaseAdminConfigured) {
+  if (!isSupabaseReadConfigured) {
     return { ok: false, message: SUPABASE_UNCONFIGURED };
   }
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return { ok: false, message: "Supabase client unavailable." };
+  const supabase = await createAuthServerClient();
 
   const id = String(input.id ?? "").trim();
   const title = String(input.title ?? "").trim();
@@ -280,11 +274,10 @@ export async function deletePolicy(
   idRaw: string
 ): Promise<PolicySubmitResult> {
   await requireAdmin();
-  if (!isSupabaseAdminConfigured) {
+  if (!isSupabaseReadConfigured) {
     return { ok: false, message: SUPABASE_UNCONFIGURED };
   }
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return { ok: false, message: "Supabase client unavailable." };
+  const supabase = await createAuthServerClient();
 
   const id = String(idRaw ?? "").trim();
   if (!id) return { ok: false, message: "Missing policy id." };

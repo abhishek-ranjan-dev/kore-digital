@@ -1,10 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import {
-  getSupabaseAdmin,
-  isSupabaseAdminConfigured,
-} from "@/lib/supabase/server";
+import { isSupabaseReadConfigured } from "@/lib/supabase/server";
+import { createAuthServerClient } from "@/lib/supabase/auth-server";
 import { requireAdmin } from "@/lib/supabase/require-admin";
 import { parseStagedRef } from "@/lib/supabase/staging-types";
 import { commitStagedFile, removeStagedFile } from "@/lib/supabase/staging";
@@ -82,17 +80,16 @@ export async function submitAnnualReport(
   formData: FormData
 ): Promise<SubmitResult> {
   await requireAdmin();
-  if (!isSupabaseAdminConfigured) {
+  if (!isSupabaseReadConfigured) {
     return {
       ok: false,
       message:
-        "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
+        "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and the publishable key.",
     };
   }
-  const supabase = getSupabaseAdmin();
-  if (!supabase) {
-    return { ok: false, message: "Supabase client unavailable." };
-  }
+  // Runs as the signed-in admin (publishable key + session) so RLS applies —
+  // requireAdmin() above guarantees the session belongs to the admin.
+  const supabase = await createAuthServerClient();
 
   // The PDF was uploaded straight to Storage from the browser (bypassing the
   // 4.5 MB Server-Action body cap); we get only a reference to it here. Every
@@ -210,9 +207,8 @@ export async function submitAnnualReport(
 }
 
 export async function listAnnualReports(): Promise<AnnualReportRow[]> {
-  if (!isSupabaseAdminConfigured) return [];
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return [];
+  if (!isSupabaseReadConfigured) return [];
+  const supabase = await createAuthServerClient();
   const { data, error } = await supabase
     .from("annual_reports")
     .select(
@@ -247,15 +243,14 @@ export async function updateAnnualReport(
   input: UpdateReportInput
 ): Promise<SubmitResult> {
   await requireAdmin();
-  if (!isSupabaseAdminConfigured) {
+  if (!isSupabaseReadConfigured) {
     return {
       ok: false,
       message:
-        "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
+        "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and the publishable key.",
     };
   }
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return { ok: false, message: "Supabase client unavailable." };
+  const supabase = await createAuthServerClient();
 
   const fiscalYear = String(input.fiscalYear ?? "").trim();
   if (!FY_RE.test(fiscalYear)) {
@@ -341,15 +336,14 @@ export async function deleteAnnualReport(
   fiscalYearRaw: string
 ): Promise<SubmitResult> {
   await requireAdmin();
-  if (!isSupabaseAdminConfigured) {
+  if (!isSupabaseReadConfigured) {
     return {
       ok: false,
       message:
-        "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
+        "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and the publishable key.",
     };
   }
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return { ok: false, message: "Supabase client unavailable." };
+  const supabase = await createAuthServerClient();
 
   const fiscalYear = String(fiscalYearRaw ?? "").trim();
   if (!FY_RE.test(fiscalYear)) {

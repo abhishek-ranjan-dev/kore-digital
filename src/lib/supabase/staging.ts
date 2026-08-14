@@ -1,17 +1,18 @@
-import { getSupabaseAdmin } from "./server";
+import { createAuthServerClient } from "./auth-server";
 import type { StagedRef } from "./staging-types";
 
 /*
-  Server-side handling of staged uploads (see staging-types.ts). All operations
-  use the service-role key and run inside Server Actions, so they bypass Storage
-  RLS. Callers MUST pass a ref that has already been through `parseStagedRef`, so
-  these never touch anything outside the `_staging/` area.
+  Server-side handling of staged uploads (see staging-types.ts). Operations run
+  as the SIGNED-IN ADMIN (publishable key + session), so Storage RLS applies —
+  the admin policy (migration 0006) grants full CRUD on the two buckets. These
+  run only inside Server Actions that have already passed `requireAdmin()`, and
+  callers MUST pass a ref that has been through `parseStagedRef`, so nothing
+  outside the `_staging/` area is ever touched here.
 */
 
 /** Read a staged object into memory. Throws on any storage error. */
 export async function downloadStagedFile(ref: StagedRef): Promise<Buffer> {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) throw new Error("Supabase client unavailable.");
+  const supabase = await createAuthServerClient();
   const { data, error } = await supabase.storage
     .from(ref.bucket)
     .download(ref.path);
@@ -21,9 +22,8 @@ export async function downloadStagedFile(ref: StagedRef): Promise<Buffer> {
 
 /** Best-effort delete of a staged object. A leftover is swept on schedule. */
 export async function removeStagedFile(ref: StagedRef): Promise<void> {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return;
   try {
+    const supabase = await createAuthServerClient();
     await supabase.storage.from(ref.bucket).remove([ref.path]);
   } catch {
     // Non-fatal — never let cleanup failure surface to the user.
@@ -40,8 +40,7 @@ export async function commitStagedFile(
   ref: StagedRef,
   toPath: string
 ): Promise<string> {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) throw new Error("Supabase client unavailable.");
+  const supabase = await createAuthServerClient();
   await supabase.storage.from(ref.bucket).remove([toPath]);
   const { error } = await supabase.storage
     .from(ref.bucket)
