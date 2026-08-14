@@ -182,7 +182,10 @@ export async function parseReportPdf(
   rawRef: StagedRef
 ): Promise<ParseReportResult> {
   await requireAdmin();
-  const apiKey = process.env.GEMINI_API_KEY;
+  // Trim: a stray trailing space/newline in the env value (common when pasting
+  // into a hosting dashboard) would otherwise be sent in the x-goog-api-key
+  // header and Gemini rejects it with 401 ACCESS_TOKEN_TYPE_UNSUPPORTED.
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) return { ok: false, message: "AI extraction is not configured." };
 
   // The PDF was uploaded straight to Storage from the browser (bypassing the
