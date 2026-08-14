@@ -3,9 +3,12 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 /*
   Supabase clients — server-only. Two roles:
     • getSupabaseRead()  — anon key, used by the public data-access layer.
-    • getSupabaseAdmin() — service-role key, used by admin Server Actions for
-      writes + Storage. NEVER import this into a client component; the service
-      key must not reach the browser bundle.
+    • getSupabaseAdmin() — service-role key. The /admin write path no longer
+      uses this (it runs as the signed-in admin via createAuthServerClient
+      under RLS). The ONLY remaining consumer is the staging-sweep cron route,
+      which has no user session and must bypass RLS to clean up stale uploads.
+      NEVER import this into a client component; the service key must not reach
+      the browser bundle.
 
   Both return null when the corresponding env vars are absent, so the app runs
   (falling back to seed data) without any Supabase configuration.
