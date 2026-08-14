@@ -4,6 +4,11 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { PDFDocument } from "pdf-lib";
 import { extractText, getDocumentProxy } from "unpdf";
 import { requireAdmin } from "@/lib/supabase/require-admin";
+import { parseStagedRef, type StagedRef } from "@/lib/supabase/staging-types";
+import {
+  downloadStagedFile,
+  removeStagedFile,
+} from "@/lib/supabase/staging";
 
 /*
   ── Gemini auto-extract for annual reports ──────────────────────────────
@@ -174,54 +179,60 @@ const PROMPT = [
 ].join("\n");
 
 export async function parseReportPdf(
-  formData: FormData
+  rawRef: StagedRef
 ): Promise<ParseReportResult> {
   await requireAdmin();
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return { ok: false, message: "AI extraction is not configured." };
 
-  const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, message: "No file provided." };
-  }
-  if (file.type !== "application/pdf") {
-    return { ok: false, message: "Auto-extract only supports PDF files." };
-  }
-  if (file.size > MAX_SOURCE_BYTES) {
-    return {
-      ok: false,
-      message: "PDF is too large to auto-extract — please fill the figures in.",
-    };
-  }
+  // The PDF was uploaded straight to Storage from the browser (bypassing the
+  // 4.5 MB Server-Action body cap); we get only a reference to it here.
+  const ref = parseStagedRef(rawRef);
+  if (!ref) return { ok: false, message: "Invalid upload reference." };
 
-  const raw = Buffer.from(await file.arrayBuffer());
-  console.log(
-    `[report-ai] parsing "${file.name}" (${(file.size / 1024 / 1024).toFixed(2)} MB)`
-  );
-
-  // Trim to the financial-statement pages when possible; else send the whole.
-  const tParseStart = performance.now();
-  let payload: Uint8Array = new Uint8Array(raw);
-  const selection = await selectRelevantPdf(raw);
-  if (selection) payload = selection.bytes;
-  const parseMs = performance.now() - tParseStart;
-  console.log(
-    `[report-ai] PDF read + page-trim: ${parseMs.toFixed(0)} ms → ${
-      selection ? "trimmed" : "whole doc"
-    } payload ${(payload.byteLength / 1024 / 1024).toFixed(2)} MB` +
-      (selection ? ` (pages [${selection.pages.join(", ")}])` : "")
-  );
-  if (payload.byteLength > MAX_INLINE_BYTES) {
-    return {
-      ok: false,
-      message: "PDF is too large to auto-extract — please fill the figures in.",
-    };
-  }
-
-  const base64 = Buffer.from(payload).toString("base64");
-
-  const stringField = { type: Type.STRING };
+  let raw: Buffer;
   try {
+    raw = await downloadStagedFile(ref);
+  } catch (err) {
+    console.error("[report-ai] staged download failed", err);
+    return { ok: false, message: "Could not read the uploaded file." };
+  }
+
+  // Always drop the staged object — extraction is transient and never persists.
+  try {
+    if (raw.byteLength === 0) return { ok: false, message: "No file provided." };
+    if (raw.byteLength > MAX_SOURCE_BYTES) {
+      return {
+        ok: false,
+        message: "PDF is too large to auto-extract — please fill the figures in.",
+      };
+    }
+    console.log(
+      `[report-ai] parsing staged PDF (${(raw.byteLength / 1024 / 1024).toFixed(2)} MB)`
+    );
+
+    // Trim to the financial-statement pages when possible; else send the whole.
+    const tParseStart = performance.now();
+    let payload: Uint8Array = new Uint8Array(raw);
+    const selection = await selectRelevantPdf(raw);
+    if (selection) payload = selection.bytes;
+    const parseMs = performance.now() - tParseStart;
+    console.log(
+      `[report-ai] PDF read + page-trim: ${parseMs.toFixed(0)} ms → ${
+        selection ? "trimmed" : "whole doc"
+      } payload ${(payload.byteLength / 1024 / 1024).toFixed(2)} MB` +
+        (selection ? ` (pages [${selection.pages.join(", ")}])` : "")
+    );
+    if (payload.byteLength > MAX_INLINE_BYTES) {
+      return {
+        ok: false,
+        message: "PDF is too large to auto-extract — please fill the figures in.",
+      };
+    }
+
+    const base64 = Buffer.from(payload).toString("base64");
+
+    const stringField = { type: Type.STRING };
     const ai = new GoogleGenAI({ apiKey });
     const tGeminiStart = performance.now();
     const res = await ai.models.generateContent({
@@ -289,6 +300,12 @@ export async function parseReportPdf(
     return { ok: true, draft };
   } catch (err) {
     console.error("[report-ai] parse error", err);
-    return { ok: false, message: "Auto-extract failed — please fill in manually." };
+    const detail = err instanceof Error ? err.message : String(err);
+    return {
+      ok: false,
+      message: `Auto-extract failed — please fill in manually. (${detail})`,
+    };
+  } finally {
+    void removeStagedFile(ref);
   }
 }

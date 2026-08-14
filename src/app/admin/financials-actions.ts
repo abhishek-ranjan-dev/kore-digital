@@ -2,11 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import {
-  ANNUAL_REPORTS_BUCKET,
   getSupabaseAdmin,
   isSupabaseAdminConfigured,
 } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/supabase/require-admin";
+import { parseStagedRef } from "@/lib/supabase/staging-types";
+import { commitStagedFile, removeStagedFile } from "@/lib/supabase/staging";
 
 /*
   Annual-report submission — Server Action.
@@ -19,7 +20,6 @@ import { requireAdmin } from "@/lib/supabase/require-admin";
   Auth: NONE — /admin is unauthenticated; protect it at the deployment layer.
   Writes use the service-role key, which never reaches the browser.
 */
-const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 const FY_RE = /^FY\d{2}-\d{2}$/;
 
 const NUMERIC_FIELDS = [
@@ -94,12 +94,25 @@ export async function submitAnnualReport(
     return { ok: false, message: "Supabase client unavailable." };
   }
 
+  // The PDF was uploaded straight to Storage from the browser (bypassing the
+  // 4.5 MB Server-Action body cap); we get only a reference to it here. Every
+  // failure below removes the staged object so an abandoned submit leaves
+  // nothing behind — a report is stored ONLY when this action succeeds.
+  const ref = parseStagedRef({
+    bucket: formData.get("stagingBucket"),
+    path: formData.get("stagingPath"),
+  });
+  if (!ref) {
+    return { ok: false, message: "The annual-report PDF is required." };
+  }
+  const fail = async (message: string): Promise<SubmitResult> => {
+    await removeStagedFile(ref);
+    return { ok: false, message };
+  };
+
   const fiscalYear = String(formData.get("fiscalYear") ?? "").trim();
   if (!FY_RE.test(fiscalYear)) {
-    return {
-      ok: false,
-      message: 'Fiscal year must look like "FY24-25".',
-    };
+    return fail('Fiscal year must look like "FY24-25".');
   }
 
   // One fiscal year, once — reject before touching Storage/DB.
@@ -109,10 +122,9 @@ export async function submitAnnualReport(
     .eq("fiscal_year", fiscalYear)
     .maybeSingle();
   if (existing) {
-    return {
-      ok: false,
-      message: `${fiscalYear} already exists — each fiscal year can be submitted once.`,
-    };
+    return fail(
+      `${fiscalYear} already exists — each fiscal year can be submitted once.`
+    );
   }
 
   const endRaw = String(formData.get("fiscalYearEnd") ?? "").trim();
@@ -127,7 +139,7 @@ export async function submitAnnualReport(
   for (const field of NUMERIC_FIELDS) {
     const v = parseNumber(formData.get(field));
     if (v === "invalid") {
-      return { ok: false, message: `"${field}" must be a number.` };
+      return fail(`"${field}" must be a number.`);
     }
     row[field] = v;
   }
@@ -135,10 +147,7 @@ export async function submitAnnualReport(
   // Consolidated trio is required (feeds the headline scorecard).
   for (const field of ["total_income", "operational_ebitda", "pat"] as const) {
     if (row[field] == null) {
-      return {
-        ok: false,
-        message: "Total Income, Operational EBITDA and PAT are required.",
-      };
+      return fail("Total Income, Operational EBITDA and PAT are required.");
     }
   }
 
@@ -150,11 +159,9 @@ export async function submitAnnualReport(
     "work_in_progress",
   ] as const) {
     if (row[field] == null) {
-      return {
-        ok: false,
-        message:
-          "Revenue, Net Worth, LT Borrowings and Work-in-Progress are required.",
-      };
+      return fail(
+        "Revenue, Net Worth, LT Borrowings and Work-in-Progress are required."
+      );
     }
   }
 
@@ -168,36 +175,26 @@ export async function submitAnnualReport(
     row.pat_margin = Math.round(((row.pat as number) / ti) * 10000) / 100;
   }
 
-  // Required PDF → Supabase Storage.
-  const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, message: "The annual-report PDF is required." };
-  }
-  if (file.type !== "application/pdf") {
-    return { ok: false, message: "Report file must be a PDF." };
-  }
-  if (file.size > MAX_UPLOAD_BYTES) {
-    return { ok: false, message: "PDF exceeds the 25 MB limit." };
-  }
+  // Commit the staged PDF to its final name (this deletes it from staging).
   const objectPath = `${fiscalYear}.pdf`;
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const { error: upErr } = await supabase.storage
-    .from(ANNUAL_REPORTS_BUCKET)
-    .upload(objectPath, buffer, {
-      contentType: "application/pdf",
-      upsert: true,
-    });
-  if (upErr) {
-    return { ok: false, message: `Storage upload failed: ${upErr.message}` };
+  let publicUrl: string;
+  try {
+    publicUrl = await commitStagedFile(ref, objectPath);
+  } catch (err) {
+    return fail(
+      `Storage upload failed: ${
+        err instanceof Error ? err.message : "unknown error"
+      }`
+    );
   }
-  const { data: pub } = supabase.storage
-    .from(ANNUAL_REPORTS_BUCKET)
-    .getPublicUrl(objectPath);
-  row.pdf_url = pub.publicUrl;
-  row.pdf_filename = file.name;
+  row.pdf_url = publicUrl;
+  row.pdf_filename =
+    String(formData.get("fileName") ?? "").trim() || `${fiscalYear}.pdf`;
 
   const { error } = await supabase.from("annual_reports").insert(row);
   if (error) {
+    // The PDF is already committed; drop it so a failed insert leaves no orphan.
+    await removeStagedFile({ bucket: ref.bucket, path: objectPath });
     // 23505 = unique_violation — the year was inserted between our check and here.
     if (error.code === "23505") {
       return {

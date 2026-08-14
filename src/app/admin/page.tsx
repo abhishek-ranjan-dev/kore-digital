@@ -59,6 +59,7 @@ import {
 } from "./policies-actions";
 import { parsePolicyPdf, type PolicyDraft } from "./policy-ai-actions";
 import { parseReportPdf, type ReportDraft } from "./report-ai-actions";
+import { stageAdminUpload } from "@/lib/supabase/stage-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -861,9 +862,10 @@ function AnnualReportCard({
   async function runParse(f: File) {
     setParsing(true);
     try {
-      const fd = new FormData();
-      fd.append("file", f);
-      const res = await parseReportPdf(fd);
+      // Upload straight to Storage (bypasses the 4.5 MB Server-Action cap),
+      // then hand the reference to the extractor. It deletes the staged file.
+      const ref = await stageAdminUpload("annual-reports", f);
+      const res = await parseReportPdf(ref);
       if (res.ok && res.draft) applyDraft(res.draft);
     } catch {
       // Best-effort: a parse failure never blocks manual entry.
@@ -907,16 +909,25 @@ function AnnualReportCard({
       });
 
     setStatus(null);
-    const fd = new FormData();
-    fd.set("fiscalYear", fiscalYear);
-    for (const k of REPORT_FIELDS) fd.set(k, values[k]);
-    fd.set("file", file);
+    const f = file;
     startSubmit(async () => {
-      const result = await submitAnnualReport(fd);
-      setStatus(result);
-      if (result.ok) {
-        resetForm();
-        onSubmitted();
+      try {
+        // Stage the PDF directly to Storage, then submit only its reference.
+        const ref = await stageAdminUpload("annual-reports", f);
+        const fd = new FormData();
+        fd.set("fiscalYear", fiscalYear);
+        for (const k of REPORT_FIELDS) fd.set(k, values[k]);
+        fd.set("stagingBucket", ref.bucket);
+        fd.set("stagingPath", ref.path);
+        fd.set("fileName", f.name);
+        const result = await submitAnnualReport(fd);
+        setStatus(result);
+        if (result.ok) {
+          resetForm();
+          onSubmitted();
+        }
+      } catch {
+        setStatus({ ok: false, message: "Upload failed — please try again." });
       }
     });
   }
@@ -1197,10 +1208,10 @@ function PolicyUploadCard({
   async function runParse(f: File) {
     setParsing(true);
     try {
-      const fd = new FormData();
-      fd.append("file", f);
-      fd.append("categories", JSON.stringify(categories));
-      const res = await parsePolicyPdf(fd);
+      // Upload straight to Storage (bypasses the 4.5 MB Server-Action cap),
+      // then hand the reference to the extractor. It deletes the staged file.
+      const ref = await stageAdminUpload("policies", f);
+      const res = await parsePolicyPdf(ref, categories);
       if (res.ok && res.draft) applyDraft(res.draft);
     } catch {
       // Best-effort: a parse failure never blocks manual entry.
@@ -1231,17 +1242,26 @@ function PolicyUploadCard({
       return setStatus({ ok: false, message: "The policy PDF is required." });
 
     setStatus(null);
+    const f = file;
     startUpload(async () => {
-      const fd = new FormData();
-      fd.append("title", title.trim());
-      fd.append("category", effectiveCategory);
-      fd.append("mandatoryUnder", mandatoryUnder.trim());
-      fd.append("file", file);
-      const result = await submitPolicy(fd);
-      setStatus(result);
-      if (result.ok) {
-        reset();
-        onUploaded();
+      try {
+        // Stage the PDF directly to Storage, then submit only its reference.
+        const ref = await stageAdminUpload("policies", f);
+        const fd = new FormData();
+        fd.append("title", title.trim());
+        fd.append("category", effectiveCategory);
+        fd.append("mandatoryUnder", mandatoryUnder.trim());
+        fd.append("stagingBucket", ref.bucket);
+        fd.append("stagingPath", ref.path);
+        fd.append("fileName", f.name);
+        const result = await submitPolicy(fd);
+        setStatus(result);
+        if (result.ok) {
+          reset();
+          onUploaded();
+        }
+      } catch {
+        setStatus({ ok: false, message: "Upload failed — please try again." });
       }
     });
   }

@@ -2,11 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import {
-  POLICIES_BUCKET,
   getSupabaseAdmin,
   isSupabaseAdminConfigured,
 } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/supabase/require-admin";
+import { parseStagedRef } from "@/lib/supabase/staging-types";
+import { commitStagedFile, removeStagedFile } from "@/lib/supabase/staging";
 import { SEED_CATEGORIES } from "@/lib/policies-data";
 
 /*
@@ -22,8 +23,6 @@ import { SEED_CATEGORIES } from "@/lib/policies-data";
   Auth: NONE — /admin is unauthenticated; protect it at the deployment layer.
   Writes use the service-role key, which never reaches the browser.
 */
-const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
-
 export interface PolicySubmitResult {
   ok: boolean;
   message: string;
@@ -121,46 +120,48 @@ export async function submitPolicy(
   const supabase = getSupabaseAdmin();
   if (!supabase) return { ok: false, message: "Supabase client unavailable." };
 
+  // The PDF was uploaded straight to Storage from the browser (bypassing the
+  // 4.5 MB Server-Action body cap); we get only a reference to it here. Every
+  // failure below removes the staged object so an abandoned submit leaves
+  // nothing behind — a policy is stored ONLY when this action succeeds.
+  const ref = parseStagedRef({
+    bucket: formData.get("stagingBucket"),
+    path: formData.get("stagingPath"),
+  });
+  if (!ref) {
+    return { ok: false, message: "The policy PDF is required." };
+  }
+  const fail = async (message: string): Promise<PolicySubmitResult> => {
+    await removeStagedFile(ref);
+    return { ok: false, message };
+  };
+
   const title = String(formData.get("title") ?? "").trim();
   const category = String(formData.get("category") ?? "").trim();
   const mandatoryUnder =
     String(formData.get("mandatoryUnder") ?? "").trim() || null;
 
-  if (!title) return { ok: false, message: "Policy title is required." };
-  if (!category) return { ok: false, message: "A category is required." };
-
-  const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, message: "The policy PDF is required." };
-  }
-  if (file.type !== "application/pdf") {
-    return { ok: false, message: "Policy file must be a PDF." };
-  }
-  if (file.size > MAX_UPLOAD_BYTES) {
-    return { ok: false, message: "PDF exceeds the 25 MB limit." };
-  }
+  if (!title) return fail("Policy title is required.");
+  if (!category) return fail("A category is required.");
 
   const categoryId = await resolveCategoryId(supabase, category);
   if (!categoryId) {
-    return { ok: false, message: "Could not resolve or create the category." };
+    return fail("Could not resolve or create the category.");
   }
 
-  // Unique-ish, readable object path. randomUUID avoids collisions on
-  // same-titled re-uploads without clobbering an earlier file.
+  // Commit the staged PDF to a unique, readable final name (this deletes it
+  // from staging). randomUUID avoids collisions on same-titled uploads.
   const objectPath = `${slugify(title)}-${crypto.randomUUID().slice(0, 8)}.pdf`;
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const { error: upErr } = await supabase.storage
-    .from(POLICIES_BUCKET)
-    .upload(objectPath, buffer, {
-      contentType: "application/pdf",
-      upsert: false,
-    });
-  if (upErr) {
-    return { ok: false, message: `Storage upload failed: ${upErr.message}` };
+  let publicUrl: string;
+  try {
+    publicUrl = await commitStagedFile(ref, objectPath);
+  } catch (err) {
+    return fail(
+      `Storage upload failed: ${
+        err instanceof Error ? err.message : "unknown error"
+      }`
+    );
   }
-  const { data: pub } = supabase.storage
-    .from(POLICIES_BUCKET)
-    .getPublicUrl(objectPath);
 
   // Place the new policy at the end of its category.
   const { data: last } = await supabase
@@ -176,11 +177,14 @@ export async function submitPolicy(
     title,
     category_id: categoryId,
     mandatory_under: mandatoryUnder,
-    pdf_url: pub.publicUrl,
-    pdf_filename: file.name,
+    pdf_url: publicUrl,
+    pdf_filename:
+      String(formData.get("fileName") ?? "").trim() || `${objectPath}`,
     sort_order: nextSort,
   });
   if (error) {
+    // The PDF is already committed; drop it so a failed insert leaves no orphan.
+    await removeStagedFile({ bucket: ref.bucket, path: objectPath });
     return { ok: false, message: `Save failed: ${error.message}` };
   }
 

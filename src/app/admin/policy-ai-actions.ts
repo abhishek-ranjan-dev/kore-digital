@@ -2,6 +2,11 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 import { requireAdmin } from "@/lib/supabase/require-admin";
+import { parseStagedRef, type StagedRef } from "@/lib/supabase/staging-types";
+import {
+  downloadStagedFile,
+  removeStagedFile,
+} from "@/lib/supabase/staging";
 
 /*
   ── Gemini auto-extract for statutory policies ──────────────────────────
@@ -69,7 +74,8 @@ function buildPrompt(categories: string[]): string {
 }
 
 export async function parsePolicyPdf(
-  formData: FormData
+  rawRef: StagedRef,
+  categories: string[] = []
 ): Promise<ParsePolicyResult> {
   await requireAdmin();
   const apiKey = process.env.GEMINI_API_KEY;
@@ -77,35 +83,35 @@ export async function parsePolicyPdf(
     return { ok: false, message: "AI extraction is not configured." };
   }
 
-  const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, message: "No file provided." };
-  }
-  if (file.type !== "application/pdf") {
-    return { ok: false, message: "Auto-extract only supports PDF files." };
-  }
-  if (file.size > MAX_INLINE_BYTES) {
-    return {
-      ok: false,
-      message: "PDF is too large to auto-extract — please fill the fields in.",
-    };
+  // The PDF was uploaded straight to Storage from the browser (bypassing the
+  // 4.5 MB Server-Action body cap); we get only a reference to it here.
+  const ref = parseStagedRef(rawRef);
+  if (!ref) return { ok: false, message: "Invalid upload reference." };
+
+  let bytes: Buffer;
+  try {
+    bytes = await downloadStagedFile(ref);
+  } catch (err) {
+    console.error("[policy-ai] staged download failed", err);
+    return { ok: false, message: "Could not read the uploaded file." };
   }
 
-  let categories: string[] = [];
+  // Always drop the staged object — extraction is transient and never persists.
   try {
-    const raw = formData.get("categories");
-    if (typeof raw === "string" && raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) categories = parsed.map(String);
+    if (bytes.byteLength === 0) {
+      return { ok: false, message: "No file provided." };
     }
-  } catch {
-    // Non-fatal: proceed with an empty category list.
-  }
+    if (bytes.byteLength > MAX_INLINE_BYTES) {
+      return {
+        ok: false,
+        message: "PDF is too large to auto-extract — please fill the fields in.",
+      };
+    }
 
-  const base64 = Buffer.from(await file.arrayBuffer()).toString("base64");
+    const cats = Array.isArray(categories) ? categories.map(String) : [];
+    const base64 = bytes.toString("base64");
 
-  const stringField = { type: Type.STRING };
-  try {
+    const stringField = { type: Type.STRING };
     const ai = new GoogleGenAI({ apiKey });
     const tGeminiStart = performance.now();
     const res = await ai.models.generateContent({
@@ -114,7 +120,7 @@ export async function parsePolicyPdf(
         {
           parts: [
             { inlineData: { mimeType: "application/pdf", data: base64 } },
-            { text: buildPrompt(categories) },
+            { text: buildPrompt(cats) },
           ],
         },
       ],
@@ -155,6 +161,12 @@ export async function parsePolicyPdf(
     return { ok: true, draft };
   } catch (err) {
     console.error("[policy-ai] parse error", err);
-    return { ok: false, message: "Auto-extract failed — please fill in manually." };
+    const detail = err instanceof Error ? err.message : String(err);
+    return {
+      ok: false,
+      message: `Auto-extract failed — please fill in manually. (${detail})`,
+    };
+  } finally {
+    void removeStagedFile(ref);
   }
 }
