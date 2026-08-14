@@ -233,7 +233,11 @@ export async function parseReportPdf(
     const base64 = Buffer.from(payload).toString("base64");
 
     const stringField = { type: Type.STRING };
-    const ai = new GoogleGenAI({ apiKey });
+    // Force the Gemini Developer API (API-key auth). Without `vertexai: false`,
+    // the SDK falls back to the GOOGLE_GENAI_USE_VERTEXAI env var; if that's set
+    // truthy in the deploy env it flips to Vertex mode and sends the key as an
+    // OAuth bearer token → 401 ACCESS_TOKEN_TYPE_UNSUPPORTED.
+    const ai = new GoogleGenAI({ apiKey, vertexai: false });
     const tGeminiStart = performance.now();
     const res = await ai.models.generateContent({
       model: GEMINI_MODEL,
