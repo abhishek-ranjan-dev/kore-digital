@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -24,6 +24,19 @@ const RANGES = [
 ] as const;
 
 type RangeKey = (typeof RANGES)[number]["key"];
+
+/** Track the sm breakpoint so the chart can shed axis width/height on phones. */
+function useIsMobile() {
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const sync = () => setMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  return mobile;
+}
 
 function ChartTooltip({
   active,
@@ -61,6 +74,7 @@ export default function StockChart({
   positive: boolean;
 }) {
   const [range, setRange] = useState<RangeKey>("6M");
+  const isMobile = useIsMobile();
 
   const filtered = useMemo(() => {
     const days = RANGES.find((r) => r.key === range)!.days;
@@ -95,17 +109,17 @@ export default function StockChart({
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap gap-1.5">
+      <div className="mb-4 grid grid-cols-7 gap-1 rounded-lg border border-white/10 bg-white/[0.02] p-1 sm:mb-5 sm:inline-grid sm:gap-1.5 sm:border-0 sm:bg-transparent sm:p-0">
         {RANGES.map((r) => (
           <button
             key={r.key}
             type="button"
             onClick={() => setRange(r.key)}
             aria-pressed={range === r.key}
-            className={`rounded px-3 py-1 text-xs font-semibold transition-colors ${
+            className={`rounded-md px-1 py-1.5 text-xs font-semibold tabular-nums transition-colors sm:px-3 sm:py-1 ${
               range === r.key
                 ? "bg-white/10 text-white"
-                : "text-white/50 hover:text-white/80"
+                : "text-white/50 hover:bg-white/[0.04] hover:text-white/80"
             }`}
           >
             {r.key}
@@ -113,11 +127,11 @@ export default function StockChart({
         ))}
       </div>
 
-      <div className="h-[350px] w-full">
+      <div className="-mx-1 h-[260px] w-[calc(100%+0.5rem)] sm:mx-0 sm:h-[350px] sm:w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={filtered}
-            margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+            margin={{ top: 8, right: isMobile ? 4 : 8, bottom: 0, left: 0 }}
           >
             <defs>
               <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -132,7 +146,7 @@ export default function StockChart({
             />
             <XAxis
               dataKey="date"
-              minTickGap={48}
+              minTickGap={isMobile ? 32 : 48}
               tickFormatter={(d: string) =>
                 new Date(d).toLocaleDateString(
                   "en-IN",
@@ -141,16 +155,18 @@ export default function StockChart({
                     : { day: "2-digit", month: "short" }
                 )
               }
-              tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
+              tick={{ fill: "rgba(255,255,255,0.4)", fontSize: isMobile ? 10 : 11 }}
+              tickMargin={8}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
               orientation="right"
-              width={58}
+              width={isMobile ? 42 : 58}
               domain={["auto", "auto"]}
-              tickFormatter={(v: number) => `₹${v}`}
-              tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
+              tickCount={isMobile ? 5 : 6}
+              tickFormatter={(v: number) => `₹${Math.round(v)}`}
+              tick={{ fill: "rgba(255,255,255,0.4)", fontSize: isMobile ? 10 : 11 }}
               axisLine={false}
               tickLine={false}
             />

@@ -47,9 +47,9 @@ export default function IRSubNav() {
       aria-label="Investor relations sections"
       className="sticky top-16 z-30 border-b border-white/10 bg-obsidian/85 backdrop-blur-md"
     >
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <div className="max-w-7xl mx-auto">
         <ul
-          className="flex gap-x-6 md:gap-x-9 overflow-x-auto"
+          className="flex gap-x-5 sm:gap-x-6 md:gap-x-9 overflow-x-auto px-6 md:px-12 [mask-image:linear-gradient(to_right,transparent,black_1.5rem,black_calc(100%-1.5rem),transparent)] sm:[mask-image:none]"
           style={{ scrollbarWidth: "none" }}
         >
           {LINKS.map((l) => {

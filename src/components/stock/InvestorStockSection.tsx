@@ -147,11 +147,11 @@ export default function InvestorStockSection() {
       </div>
 
       {/* ── Chart ── */}
-      <div className="p-6 md:p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         {status === "loading" ? (
-          <div className="h-[350px] w-full animate-pulse rounded-xl bg-white/[0.03]" />
+          <div className="h-[260px] w-full animate-pulse rounded-xl bg-white/[0.03] sm:h-[350px]" />
         ) : status === "error" || !data ? (
-          <div className="flex h-[350px] w-full flex-col items-center justify-center gap-3 text-center">
+          <div className="flex h-[260px] w-full flex-col items-center justify-center gap-3 text-center sm:h-[350px]">
             <p className="text-sm text-white/60">
               Live market data is temporarily unavailable.
             </p>

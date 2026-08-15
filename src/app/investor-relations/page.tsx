@@ -206,9 +206,9 @@ export default function InvestorRelationsPage() {
             className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-obsidian"
           />
 
-          <div className="relative max-w-7xl mx-auto px-6 md:px-12 py-20 md:py-28 flex min-h-[380px] flex-col justify-center md:min-h-[480px]">
-            <div className="max-w-3xl space-y-7">
-              <div className="inline-flex flex-wrap items-center gap-x-3 gap-y-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5">
+          <div className="relative max-w-7xl mx-auto px-6 md:px-12 py-16 sm:py-20 md:py-28 flex min-h-[320px] flex-col justify-center sm:min-h-[380px] md:min-h-[480px]">
+            <div className="max-w-3xl space-y-6 sm:space-y-7">
+              <div className="inline-flex flex-wrap items-center gap-x-2.5 gap-y-1.5 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 sm:gap-x-3 sm:rounded-full sm:py-1.5">
                 <span className="ticker-pulse bg-emerald w-2 h-2 rounded-full" />
                 <span className="text-[10px] text-white/60 uppercase tracking-[0.18em] font-medium">
                   NSE Listed
@@ -243,14 +243,14 @@ export default function InvestorRelationsPage() {
               <div className="flex flex-wrap items-center gap-3 pt-1">
                 <a
                   href="#performance"
-                  className="inline-flex items-center gap-2 rounded-lg bg-emerald px-5 py-2.5 text-sm font-bold text-obsidian transition hover:brightness-110"
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald px-5 py-3 text-sm font-bold text-obsidian transition hover:brightness-110 sm:flex-none sm:py-2.5"
                 >
                   View performance
                   <ArrowUpRight className="w-4 h-4" />
                 </a>
                 <a
                   href="#policies"
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-emerald hover:text-emerald"
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:border-emerald hover:text-emerald sm:flex-none sm:py-2.5"
                 >
                   Statutory policies
                 </a>
