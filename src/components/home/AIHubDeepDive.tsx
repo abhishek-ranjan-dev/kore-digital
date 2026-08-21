@@ -107,7 +107,7 @@ export default function AIHubDeepDive() {
           align="left"
           badgeIcon={Cpu}
           badgeLabel="AI Hub"
-          title="One gigawatt of AI-ready compute, engineered for India."
+          title='Developing 1.5GW Power and Communications capability for "The Green DataCenter India Pvt. Ltd."'
           subtitle="Purpose-built for GPU-dense training and low-latency inference — liquid-cooled halls, renewable-first power, and direct interconnect to the national fiber backbone."
           className="mb-14 md:mb-20"
         />
