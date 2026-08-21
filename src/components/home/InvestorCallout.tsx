@@ -2,17 +2,8 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, FileText } from "lucide-react";
 import GlowCallout from "@/components/ui/GlowCallout";
 import SectionBadge from "@/components/ui/SectionBadge";
-import { disclosures } from "@/data/disclosures";
-
-const dateFmt = new Intl.DateTimeFormat("en-IN", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-});
 
 export default function InvestorCallout() {
-  const recent = disclosures.slice(0, 2);
-
   return (
     <section className="bg-obsidian py-24 md:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -22,7 +13,7 @@ export default function InvestorCallout() {
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald/30 bg-emerald/10 px-3 py-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald ticker-pulse" />
                 <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-emerald">
-                  NSE Live · KOREDIGIT
+                  NSE Live · KDL
                 </span>
               </div>
 
@@ -60,38 +51,26 @@ export default function InvestorCallout() {
                   <SectionBadge
                     tone="dark"
                     icon={FileText}
-                    label="Recent disclosures"
+                    label="Statutory policies"
                   />
-                  <span className="text-[10px] uppercase tracking-widest text-white/60">
-                    Auto-synced
-                  </span>
                 </div>
 
-                <ul className="divide-y divide-white/10 border-y border-white/10">
-                  {recent.map((item) => {
-                    const href = item.fileUrl?.length
-                      ? item.fileUrl
-                      : "/investor-relations";
-                    return (
-                      <li key={item.id}>
-                        <Link
-                          href={href}
-                          className="group flex items-start gap-3 rounded-lg -mx-3 px-3 py-3 hover:bg-white/[0.04] transition-colors"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-mono uppercase tracking-widest text-white/60 mb-1">
-                              {dateFmt.format(new Date(item.date))}
-                            </p>
-                            <p className="text-sm font-medium text-white group-hover:text-emerald transition-colors line-clamp-2">
-                              {item.title}
-                            </p>
-                          </div>
-                          <ArrowUpRight className="w-4 h-4 text-white/40 group-hover:text-emerald flex-shrink-0 mt-1 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
+                <Link
+                  href="/investor-relations#policies"
+                  className="group flex items-start gap-3 rounded-lg border border-white/10 p-4 hover:bg-white/[0.04] hover:border-emerald/40 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white group-hover:text-emerald transition-colors">
+                      SEBI policy library
+                    </p>
+                    <p className="text-xs text-white/60 mt-1 leading-relaxed">
+                      Every mandatory policy filed under SEBI (LODR) —
+                      governance, code of conduct, and the material-event
+                      framework.
+                    </p>
+                  </div>
+                  <ArrowUpRight className="w-4 h-4 text-white/40 group-hover:text-emerald flex-shrink-0 mt-0.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </Link>
               </div>
             </div>
           </div>
