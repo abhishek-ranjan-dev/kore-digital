@@ -404,7 +404,7 @@ export function SignInCard({
                   )}
                   <Link
                     href={forgotPasswordHref}
-                    className="text-xs text-white/60 hover:text-white transition-colors duration-200 shrink-0"
+                    className="relative z-10 text-xs text-white/60 hover:text-white transition-colors duration-200 shrink-0"
                   >
                     Forgot password?
                   </Link>
