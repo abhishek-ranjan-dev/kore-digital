@@ -85,5 +85,5 @@ export const keyMetrics = {
   datacenterCapacity: "1 GW",
   listingExchange: "NSE",
   isin: "INE0KDL01021",
-  ticker: "KOREDIGIT",
+  ticker: "KDL",
 };

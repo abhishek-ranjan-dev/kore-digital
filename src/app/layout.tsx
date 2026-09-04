@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s | Kore Digital Limited",
   },
   description:
-    "Kore Digital Limited (NSE: KOREDIGIT) is a multi-sector deep-tech conglomerate building India's telecom infrastructure network — 701 km underground fiber optic network on the Samruddhi Mahamarg, a 1 GW AI datacenter hub in NAINA Mumbai, and on-demand metal additive manufacturing & reverse engineering for aerospace and defence.",
+    "Kore Digital Limited (NSE: KDL) is a multi-sector deep-tech conglomerate building India's telecom infrastructure network — 701 km underground fiber optic network on the Samruddhi Mahamarg, a 1 GW AI datacenter hub in NAINA Mumbai, and on-demand metal additive manufacturing & reverse engineering for aerospace and defence.",
   keywords: [
     // Primary SEO targets
     "AI datacenter",
@@ -29,6 +29,7 @@ export const metadata: Metadata = {
     // Brand & listing
     "Kore Digital",
     "Kore Digital Limited",
+    "KDL",
     "KOREDIGIT",
     "NSE listed",
     "SEBI",
@@ -53,7 +54,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kore Digital Limited (NSE: KOREDIGIT)",
+    title: "Kore Digital Limited (NSE: KDL)",
     description:
       "Telecom infrastructure network · AI datacenter · On-demand metal additive manufacturing · Reverse engineering.",
   },
