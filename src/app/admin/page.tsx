@@ -926,8 +926,14 @@ function AnnualReportCard({
           resetForm();
           onSubmitted();
         }
-      } catch {
-        setStatus({ ok: false, message: "Upload failed — please try again." });
+      } catch (err) {
+        const detail = err instanceof Error ? err.message.trim() : "";
+        setStatus({
+          ok: false,
+          message: detail
+            ? `Upload failed: ${detail}`
+            : "Upload failed — please try again.",
+        });
       }
     });
   }
@@ -1260,8 +1266,14 @@ function PolicyUploadCard({
           reset();
           onUploaded();
         }
-      } catch {
-        setStatus({ ok: false, message: "Upload failed — please try again." });
+      } catch (err) {
+        const detail = err instanceof Error ? err.message.trim() : "";
+        setStatus({
+          ok: false,
+          message: detail
+            ? `Upload failed: ${detail}`
+            : "Upload failed — please try again.",
+        });
       }
     });
   }
